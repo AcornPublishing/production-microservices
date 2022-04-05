@@ -1,0 +1,645 @@
+<section data-type="chapter" id="microservices.asciidoc" class="pagenumrestart">
+<h1>Microservices</h1>
+
+
+<p>In the past few years, the technology industry has witnessed a rapid change in applied, practical distributed systems architecture that has led industry giants (such as Netflix, Twitter, Amazon, eBay, and Uber) away from building monolithic applications to adopting microservice architecture. <a data-type="indexterm" data-primary="monolithic applications" data-secondary="challenges of"/>While the fundamental concepts behind microservices are not new, the contemporary application of microservice architecture truly is, and its adoption has been driven in part by scalability challenges, lack of efficiency, slow developer velocity, and the difficulties with adopting new technologies that arise when complex software systems are contained within and deployed as one large monolithic application.</p>
+
+<p>Adopting microservice architecture, whether from the ground up or by splitting an existing monolithic application into independently developed and deployed microservices, solves these problems. With microservice architecture, an application can easily be scaled both horizontally and vertically, developer productivity and velocity increase dramatically, and old technologies can easily be swapped out for the newest ones.</p>
+
+<p>As <a data-type="indexterm" data-primary="microservice architecture" data-secondary="challenges of"/>we will see in this chapter, the adoption of microservice architecture can be seen as a natural step in the scaling of an application. The splitting of a monolithic application into microservices is driven by scalability and efficiency concerns, but microservices introduce challenges of their own. A successful, scalable microservice ecosystem requires that a stable and sophisticated infrastructure be in place. In addition, the organizational structure of a company adopting microservices must be radically changed to support microservice architecture, and the team structures that spring from this can lead to siloing and sprawl. The largest challenges that microservice architecture brings, however, are the need for standardization of the architecture of the services themselves, along with requirements for each microservice in order to ensure trust and availability.</p>
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>From Monoliths to Microservices</h1>
+
+<p>Almost <a data-type="indexterm" id="aa1" data-primary="application architectures"/><a data-type="indexterm" data-primary="three-tier architecture"/>every software application written today can be broken into three distinct elements: a <em>frontend</em> (or <em>client-side</em>) piece, a <em>backend</em> piece, and some type of <em>datastore</em> (<a data-type="xref" href="#three_tier_architecture"/>). Requests are made to the application through the client-side piece, the backend code does all the heavy lifting, and any relevant data that needs to be stored or accessed (whether temporarily in memory of permanently in a database) is sent to or retrieved from wherever the data is stored. We&#8217;ll call this <em>the three-tier architecture</em>.</p>
+
+<figure id="three_tier_architecture">
+<img src="images/prms_0101.png" alt="images/chapter1/standard_app_arch.png"/>
+<figcaption>Three-tier architecture</figcaption>
+</figure>
+
+<p>There are three different ways these elements can be combined to make an application. Most applications put the first two pieces into one codebase (or repository), where all client-side and backend code are stored and run as one executable file, with a separate database. Others separate out all frontend, client-side code from the backend code and store them as separate logical executables, accompanied by an external database. Applications that don&#8217;t require an external database and store all data in memory tend to combine all three elements into one repository. Regardless of the way these elements are divided or combined, the <em>application</em> itself is considered to be the sum of these three distinct elements.</p>
+
+<p>Applications are usually architected, built, and run this way from the beginning of their lifecycles, and the architecture of the application is typically independent of the product offered by the company or the purpose of the application itself. These three architectural elements that comprise the three-tier architecture are present in every website, every phone application, every backend and frontend and strange enormous enterprise application, and are found as one of the permutations described.</p>
+
+<p>In the early stages, when a company is young, its application(s) simple, and the number of developers contributing to the codebase is small, developers typically share the burden of contributing to and maintaining the codebase. As the company grows, more developers are hired, new features are added to the application, and three significant things happen.</p>
+
+<p>First comes an increase in the operational workload. Operational work is, generally speaking, the work associated with running and maintaining the application. This usually leads to the hiring of operational engineers (system administrators, TechOps engineers, and so-called "DevOps" engineers) who take over the majority of the operational tasks, like those related to hardware, monitoring, and on call.</p>
+
+<p>The second thing that happens is a result of simple mathematics: adding new features to your application increases both the number of lines of code in your application and the complexity of the application itself.</p>
+
+<p>Third is the <a data-type="indexterm" id="as1" data-primary="application scalability"/><a data-type="indexterm" id="s1oa" data-primary="scalability" data-secondary="of applications"/>necessary horizontal and/or vertical scaling of the application. Increases in traffic place significant scalability and performance demands on the application, requiring that more servers host the application. More servers are added, a copy of the application is deployed to each server, and <a data-type="indexterm" data-primary="load balancing"/>load balancers are put into place so that the requests are distributed appropriately among the servers hosting the application (see <a data-type="xref" href="#scaling_horizontally"/>, containing a frontend piece, which may contain its own load-balancing layer, a backend load-balancing layer, and the backend servers). Vertical scaling becomes a necessity as the application begins processing a larger number of tasks related to its diverse set of features, so the application is deployed to larger, more powerful servers that can handle CPU and memory demands (<a data-type="xref" href="#scaling_vertically"/>).</p>
+
+<figure id="scaling_horizontally">
+<img src="images/prms_0102.png" alt="images/chapter1/horizontal_scaling.png"/>
+<figcaption>Scaling an application horizontally</figcaption>
+</figure>
+
+<figure id="scaling_vertically">
+<img src="images/prms_0103.png" alt="images/chapter1/vertical_scaling.png"/>
+<figcaption>Scaling an application vertically</figcaption>
+</figure>
+
+<p>As the <a data-type="indexterm" data-primary="horizontal scaling"/><a data-type="indexterm" data-primary="vertical scaling"/>company grows, and the number of engineers is no longer in the single, double, or even triple digits, things start to get a little more complicated. Thanks to all the features, patches, and fixes added to the codebase by the developers, the application is now thousands upon thousands of lines long. The complexity of the application is growing steadily, and hundreds (if not thousands) of tests must be written in order to ensure that any change made (even a change of one or two lines) doesn&#8217;t compromise the integrity of the existing thousands upon thousands of lines of code. Development and deployment become a nightmare, testing becomes a burden and a blocker to the deployment of even the most crucial fixes, and technical debt piles up quickly. Applications whose lifecycles fit into this pattern (for better or for worse) are fondly (and appropriately) referred to in the <a data-type="indexterm" data-primary="monoliths, defined"/>software community as <em>monoliths</em>.</p>
+
+<p>Of course, not all monolithic applications are bad, and not every monolithic application suffers from the problems listed, but monoliths that don&#8217;t hit these issues at some point in their lifecycle are (in my experience) pretty rare. The reason most monoliths are susceptible to these problems is because the nature of a monolith is directly opposed to <em>scalability</em> in the most general possible sense.
+Scalability <a data-type="indexterm" data-primary="monolithic applications" data-secondary="scalability issues with"/>requires <em>concurrency</em> and <em>partitioning</em>: the two things that are difficult to accomplish with a monolith.</p>
+<aside data-type="sidebar" class="pagebreak-before">
+<h5>Scaling an Application</h5>
+<p>Let&#8217;s break this down a bit.</p>
+
+<p>The goal of any software application is to process tasks of some sort. Regardless of what those tasks are, we can make a general assumption about how we want our application to handle them: it needs to process them efficiently.</p>
+
+<p>To <a data-type="indexterm" data-primary="concurrency"/>process tasks efficiently, our application needs to have some kind of <em>concurrency</em>. This means that we can&#8217;t have just one process that does all the work, because then that process will pick up one task at a time, complete all the necessary pieces of it (or fail!), and then move onto the next—this isn&#8217;t efficient at all! To make our application efficient, we can introduce concurrency so that each task can be broken up into smaller pieces.</p>
+
+<p>The second thing we can do to process tasks efficiently is to divide and conquer by introducing <em>partitioning</em>, <a data-type="indexterm" data-primary="partitioning"/>where each task is not only broken up into small pieces but can be processed in parallel. If we have a bunch of tasks, we can process them all at the same time by sending them to a set of workers that can process them in parallel. If we need to process more tasks, we can easily scale with the demand by adding additional workers to process the new tasks without affecting the efficiency of our system.</p>
+
+<p>Concurrency and partitioning are difficult to support when you have one large application that needs to be deployed to every server, which needs to process any type of task. If your application is even the slightest bit complicated, the only way you can scale it with a growing list of features and increasing traffic is to scale up the hardware that the application is deployed to.</p>
+
+<p>To be truly efficient, the best way to scale an application is to break it into many small, independent applications that each do one type of task. Need to add another step to the overall process? Easy enough: just make a new application that only does that step! Need to handle more traffic? Simple: add more workers to each  application!</p>
+
+<p>Concurrency and partitioning are difficult to support in a monolithic application, which prevents monolithic application architecture from being as efficient as we need it to be.</p>
+</aside>
+
+<p>We&#8217;ve seen this pattern emerge at companies like Amazon, Twitter, Netflix, eBay, and Uber: companies that run applications across not hundreds, but thousands, even hundreds of thousands of servers and whose applications have evolved into monoliths and hit scalability challenges. The challenges they faced were remedied by abandoning monolithic application architecture in favor <a data-type="indexterm" data-primary="application scalability" data-startref="as1"/><a data-type="indexterm" data-primary="scalability" data-secondary="of applications" data-startref="s1oa"/>of <em>microservices</em>.</p>
+
+<p>The basic concept of a <a data-type="indexterm" id="ma1cago" data-primary="microservice architecture" data-secondary="concept and goals of"/>microservice is simple: it&#8217;s a small application that does one thing only, and does that one thing well. A microservice is a small component that is easily replaceable, independently developed, and independently deployable. A microservice cannot live alone, however—no microservice is an island—and it is part of a larger system, running and working alongside other microservices to accomplish what would normally be handled by one large standalone application.</p>
+
+<p>The goal of microservice architecture is to build a set of small applications that are each responsible for performing one function (as opposed to the traditional way of building one application that does everything), and to let each microservice be autonomous, independent, and self-contained. The core difference between a monolithic application and microservices is this: a monolithic application (<a data-type="xref" href="#monolith"/>) will contain all features and functions within one application and one codebase, all deployed at the same time, with each server hosting a complete copy of the entire application, while a microservice (<a data-type="xref" href="#microservices_figure"/>) contains only one function or feature and lives in a <em>microservice ecosystem</em> along with other microservices that each perform one function or feature.</p>
+
+<figure id="monolith">
+<img src="images/prms_0104.png" alt="images/chapter1/monolith.png"/>
+<figcaption>Monolith</figcaption>
+</figure>
+
+<figure id="microservices_figure">
+<img src="images/prms_0105.png" alt="images/chapter1/microservices-edited.png"/>
+<figcaption>Microservices</figcaption>
+</figure>
+
+<p>There <a data-type="indexterm" data-primary="microservice architecture" data-secondary="concept and goals of" data-startref="ma1cago"/>are numerous <a data-type="indexterm" data-primary="microservice architecture" data-secondary="benefits of"/>benefits to adopting microservice architecture—including (but not limited to) reduced technical debt, improved developer productivity and velocity, better testing efficiency, increased scalability, and ease of deployment—and companies that adopt microservice architecture usually do so after having built one application and hitting scalability and organizational challenges. They begin with a monolithic application and then <em>split the monolith</em> into microservices.</p>
+
+<p>The <a data-type="indexterm" id="ma1sim" data-primary="monolithic applications" data-secondary="splitting into microservices"/><a data-type="indexterm" id="mam1" data-primary="microservice adoption from monolith"/>difficulties of splitting a monolith into microservices depend entirely on the complexity of the monolithic application. A monolithic application with many features will take a great deal of architectural effort and careful deliberation to successfully break up into microservices, and additional complexity is introduced by the need to reorganize and restructure teams. The decision to move to microservices must always become a company-wide effort.</p>
+
+<p>There are several steps in breaking apart a monolith. The first is to identify the components <a data-type="indexterm" data-primary="key functions identification"/>that should be written as independent services. This is perhaps the most difficult step in the entire process, because while there may be a number of right ways to split the monolith into component services, there are far more wrong ways. The rule of thumb in identifying components is to pinpoint key overall functionalities of the monolith, then split those functionalities into small independent components. Microservices must be as simple as possible or else the company will risk the possibility of replacing one monolith with several smaller monoliths, which will all suffer the same problems as the company grows.</p>
+
+<p>Once the key functions have been identified and properly componentized into independent microservices, the organizational structure of the company must be restructured so that each microservice is staffed by an engineering team. There are several ways to do this. The first method of company reorganization <a data-type="indexterm" data-primary="company reorganization for microservice adoption"/>around microservice adoption is to dedicate one team to each microservice. The size of the team will be determined completely by the complexity and workload of the microservice and should be staffed by enough developers and site reliability engineers so that both feature development and the on-call rotation of the service can be managed without burdening the team. The second is to assign several services to one team and have that team develop the services in parallel. This works best when the teams are organized around specific products or business domains, and are responsible for developing any services related to those products or domains. If a company chooses the second method of reorganization, it needs to make sure that developers aren&#8217;t overworked and don&#8217;t face task, outage, or operational fatigue.</p>
+
+<p>Another important part of microservice adoption is the creation of a <em>microservice ecosystem</em>. <a data-type="indexterm" data-primary="microservice ecosystem" data-secondary="creation of"/>Typically (or, at least, hopefully), a company running a large monolithic application will have a dedicated infrastructure organization that is responsible for designing, building, and maintaining the infrastructure that the application runs on. When a monolith is split into microservices, the responsibilities of the infrastructure organization for providing a stable platform for microservices to be developed and run on grows drastically in importance. The infrastructure teams must provide microservice teams with stable infrastructure that abstracts away the majority of the complexity of the interactions between microservices.</p>
+
+<p>Once <a data-type="indexterm" data-primary="migration options"/>these three steps have been completed—the componentization of the application, the restructuring of engineering teams to staff each microservice, and the development of the infrastructure organization within the company—the migration can begin. Some teams choose to pull the relevant code for their microservice directly from the monolith and into a separate service, and shadow the monolith’s traffic until they are convinced that the microservice can perform the desired functionality on its own. Other teams choose to build the service from scratch, starting with a clean slate, and shadow traffic or redirect after the service has passed appropriate tests. The best approach to migration depends on the functionality of the microservice, and I have seen both approaches work equally well in most cases, but the real key to a successful migration is thorough, careful, painstakingly documented planning and execution, along with the realization that a complete migration of a large monolith can take several long years.</p>
+
+<p>With all the work involved in splitting a monolith into microservices, it may seem better to begin with microservice architecture, skip all of the painful scalability challenges, and avoid the microservice migration drama. This approach may turn out all right for some companies, but I want to offer several words of caution. Small companies often do not have the necessary infrastructure in place to sustain microservices, even at a very small scale: good microservice architecture requires stable, often very complex, infrastructure. <a data-type="indexterm" data-primary="infrastructure requirements"/>Such stable infrastructure requires a large, dedicated team whose cost can typically be sustained only by companies that have reached the scalability challenges that justify the move to microservice architecture. Small companies simply will not have enough operational capacity to maintain a microservice ecosystem. Furthermore, it’s extraordinarily difficult to identify key areas and components to build into microservices when a company is in the early stages: applications at new companies will not have many features, nor many separate areas of functionality that can be split <a data-type="indexterm" data-primary="monolithic applications" data-secondary="splitting into microservices" data-startref="ma1sim"/><a data-type="indexterm" data-primary="application architectures" data-startref="aa1"/><a data-type="indexterm" data-primary="microservice adoption from monolith" data-startref="mam1"/>appropriately into microservices.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1" id="microservice_architecture">
+<h1>Microservice Architecture</h1>
+
+<p>The <em>architecture of a microservice</em> (<a data-type="xref" href="#elements_of_microservice_architecture"/>) <a data-type="indexterm" id="ma1" data-primary="microservice architecture"/>is not very different from the standard application architecture covered in the first section of this chapter (<a data-type="xref" href="#three_tier_architecture"/>). Each and every microservice will have three components: a frontend (client-side) piece, some backend code that does the heavy lifting, and a way to store or retrieve any relevant data.</p>
+
+<p>The frontend, client-side piece of a microservice is not your typical frontend application, but rather an <em>application programming interface</em> (API) <a data-type="indexterm" id="apie1" data-primary="API (application programming interface) endpoints"/><a data-type="indexterm" id="ma1apie" data-primary="microservice architecture" data-secondary="API endpoints"/>with static <em>endpoints</em>. Well-designed microservice APIs allow microservices to easily and effectively interact, sending requests to the relevant API endpoint(s). For example, a microservice that is responsible for customer data might have a <em>get_customer_information</em> endpoint that other services could send requests to in order to retrieve information about customers, an <em>update_customer_information</em> endpoint that other services could send requests to in order to update the information for a specific customer, and a <em>delete_customer_information</em> endpoint that services could use to delete a customer&#8217;s information.</p>
+
+<figure id="elements_of_microservice_architecture">
+<img src="images/prms_0106.png" alt="images/chapter1/microservice_elements.png"/>
+<figcaption>Elements of microservice architecture</figcaption>
+</figure>
+
+<p>These endpoints are separated out in architecture and theory alone, not in practice, for they live alongside and as part of all the backend code that processes every request. For our example microservice that is responsible for customer data, a request sent to the <em>get_customer_information</em> endpoint would trigger a task that would process the incoming request, determine any specific filters or options that were applied in the request, retrieve the information from a database, format the information, and return it to the client (microservice) that requested it.</p>
+
+<p>Most microservices <a data-type="indexterm" data-primary="microservice architecture" data-secondary="data storage"/><a data-type="indexterm" data-primary="data storage"/>will store some type of data, whether in memory (perhaps using a cache) or an external database. If the relevant data is stored in memory, there&#8217;s no need to make an extra network call to an external database, and the microservice can easily return any relevant data to a client. If the data is stored in an external database, the microservice will need to make another request to the database, wait for a response, and then continue to process the task.</p>
+
+<p>This architecture is necessary if microservices are to work well together. The microservice architecture paradigm requires that a set of microservices work together to make up what would otherwise exist as one large application, and so there are certain elements of this architecture that need to be standardized across an entire organization if a set of microservices is to interact successfully and efficiently.</p>
+
+<p>The API endpoints of microservices should be standardized across an organization. That is not to say that all microservices should have the same specific endpoints, but that the type of endpoint should be the same. Two very common types of API endpoints for microservices are <a data-type="indexterm" data-primary="REST endpoints"/>REST or <a data-type="indexterm" data-primary="Apache Thrift endpoints"/>Apache Thrift, and I&#8217;ve seen some microservices that have both types of endpoints (though this is rare, makes monitoring rather complicated, and I don&#8217;t particularly recommend it). Choice of endpoint type is reflective of the internal workings of the microservice itself, and will also dictate its architecture: it&#8217;s difficult to build an asynchronous microservice that communicates via HTTP over REST endpoints, for example, which would necessitate adding a messaging-based endpoint to the services as well.</p>
+
+<p>Microservices interact with each other via <em>remote procedure calls</em> (RPCs), <a data-type="indexterm" data-primary="remote procedure calls (RPCs)"/><a data-type="indexterm" data-primary="microservice architecture" data-secondary="remote procedure calls (RPCs)"/>which are calls over the network designed to look and behave exactly like local procedure calls. The protocols used will be dependent on architectural choices and organizational support, as well as the endpoints used. A microservice with REST endpoints, for example, will likely interact with other microservices via HTTP, while a microservice with Thrift endpoints may communicate with other microservices over HTTP or a more customized, in-house solution.</p>
+<div data-type="warning"><h1>Avoid Versioning Microservices and Endpoints</h1>
+<p>A microservice is not a library (it is not loaded into memory at compilation-time or during runtime) but an independent software application. Due to the fast-paced nature of microservice development, versioning microservices can easily become an organizational nightmare, with developers on client services pinning specific (outdated, unmaintained) versions of a microservice in their own code. Microservices should be treated as living, changing things, not static releases or libraries. <a data-type="indexterm" data-primary="versioning"/>Versioning of API endpoints is another anti-pattern that should be avoided for the same reasons.</p>
+</div>
+
+<p>Any type of endpoint and any protocol used to communicate with other microservices will have benefits and trade-offs. The architectural decisions here shouldn&#8217;t be made by the individual developer who is building a microservice, but should be part of the architectural design of the microservice ecosystem as a whole (we&#8217;ll get to this in the next section).</p>
+
+<p>Writing a microservice gives the developer a great deal of freedom: aside from any organizational choices regarding API endpoints and communication protocols, developers are free to write the internal workings of their microservice however they wish. It can be written in any language whatsoever—it can be written in Go, in Java, in Erlang, in Haskell—as long as the endpoints and communication protocols are taken care of. Developing a microservice is not all that different from developing a standalone application. <a data-type="indexterm" data-primary="API (application programming interface) endpoints" data-startref="apie1"/><a data-type="indexterm" data-primary="microservice architecture" data-secondary="API endpoints" data-startref="ma1apie"/>There are some caveats to this, as we will see in the final section of this chapter (<a data-type="xref" href="#organizational_challenges"/>), because developer freedom with regard to language choice comes at a hefty cost to the engineering organization.</p>
+
+<p>In this way, a microservice can be treated by others as a black box: you put some information in by sending a request to one of its endpoints, and you get something out. If you get what you want and need out of the microservice in a reasonable time and without any crazy errors, it has done its job, and there&#8217;s no need to understand anything further than the endpoints you need to hit and whether or not the service is working properly.</p>
+
+<p>Our discussion of the specifics of microservice architecture will end here—not because this is all there is to microservice architecture, but because each of the following chapters within this book is devoted to bringing microservices to this <a data-type="indexterm" data-primary="microservice architecture" data-startref="ma1"/>ideal black-box state.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>The Microservice Ecosystem</h1>
+
+<p>Microservices <a data-type="indexterm" id="me1" data-primary="microservice ecosystem"/>do not live in isolation. The environment in which microservices are built, are run, and interact is where they <em>live</em>. The complexities of the large-scale microservice environment are on par with the ecological complexities of a rainforest, a desert, or an ocean, and considering this environment as an ecosystem—a <em>microservice ecosystem</em>—is beneficial in adopting microservice architecture.</p>
+
+<p>In well-designed, sustainable microservice ecosystems, the microservices are abstracted away from all infrastructure. They are abstracted away from the hardware, abstracted away from the networks, abstracted away from the build and deployment pipeline, abstracted away from service discovery and load balancing. <a data-type="indexterm" id="id1" data-primary="infrastructure development" data-seealso="microservice ecosystem"/>This is all part of the infrastructure of the microservice ecosystem, and building, standardizing, and maintaining this infrastructure in a stable, scalable, fault-tolerant, and reliable way is essential for successful microservice operation.</p>
+
+<p>The infrastructure has to sustain the microservice ecosystem. The goal of all infrastructure engineers and architects must be to remove the low-level operational concerns from microservice development and build a stable infrastructure that can scale, one that developers can easily build and run microservices on top of. Developing a microservice within a stable microservice ecosystem should be just like developing a small standalone application. This requires very sophisticated, top-notch infrastructure.</p>
+
+<p>The microservice ecosystem can be split into four layers (<a data-type="xref" href="#four_layer_model"/>), though the boundaries of each are not always clearly defined: some elements of the infrastructure will touch every part of the stack. The lower three layers are the infrastructure layers: at the bottom of the stack we find the hardware layer, and on top of that, the communication layer (which bleeds up into the fourth layer), followed by the application platform. The fourth (top) layer is where all individual microservices live.</p>
+
+<figure id="four_layer_model">
+<img src="images/prms_0107.png" alt="images/chapter1/four_layers.png"/>
+<figcaption>Four-layer model of the microservice ecosystem</figcaption>
+</figure>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Layer 1: Hardware</h2>
+
+<p>At <a data-type="indexterm" id="me1h" data-primary="microservice ecosystem" data-secondary="hardware layer"/><a data-type="indexterm" id="id1h" data-primary="infrastructure development" data-secondary="hardware"/><a data-type="indexterm" id="h1" data-primary="hardware"/>the very bottom of the microservice ecosystem, we find the <em>hardware layer</em>. These are the actual machines, the real, physical computers that all internal tools and all microservices run on. These servers are located on racks within datacenters, being cooled by expensive HVAC systems and powered by electricity. Many different types of servers can live here: some are optimized for databases; others for processing CPU-intensive tasks. These servers can either be owned by the company itself, or "rented" from so-called cloud providers like Amazon Web Services&#8217; <a data-type="indexterm" data-primary="Elastic Compute Cloud (AWS EC2)"/>Elastic Compute Cloud (AWS EC2), <a data-type="indexterm" data-primary="Google Cloud Platform (GCP)"/>Google Cloud Platform (GCP), or <a data-type="indexterm" data-primary="Microsoft Azure"/><a data-type="indexterm" data-primary="Azure"/>Microsoft Azure.</p>
+
+<p>The choice of specific hardware is determined by the owners of the servers. If your company is running your own datacenters, the choice of hardware is your own, and you can optimize the server choice for your specific needs. If you are running servers in the cloud (which is the more common scenario), your choice is limited to whatever hardware is offered by the cloud provider. <a data-type="indexterm" data-primary="bare metal"/><a data-type="indexterm" data-primary="cloud providers"/>Choosing between <em>bare metal</em> and a <em>cloud provider</em> (or providers) is not an easy decision to make, and cost, availability, reliability, and operational expenses are things that need to be considered.</p>
+
+<p>Managing these servers is part of the hardware layer. Each server needs to have an <em>operating system</em> installed, and the operating system should be standardized across all servers. <a data-type="indexterm" data-primary="operating systems"/>There is no correct, right answer as to which operating system a microservice ecosystem should use: the answer to this question depends entirely on the applications you will be building, the languages they will be written in, and the libraries and tools that your microservices require. The majority of microservice ecosystems run some variant of <a data-type="indexterm" data-primary="Linux"/>Linux, commonly <a data-type="indexterm" data-primary="CentOS"/>CentOS, <a data-type="indexterm" data-primary="Debian"/>Debian, or <a data-type="indexterm" data-primary="Ubuntu"/>Ubuntu, but a .NET company will, obviously, choose differently. Additional abstractions can be built and layered atop the hardware: <a data-type="indexterm" data-primary="resource isolation"/><a data-type="indexterm" data-primary="resource management"/>resource isolation and resource abstraction (as offered by technologies like Docker and Apache Mesos) also belong in this layer, as do databases (dedicated or shared).</p>
+
+<p>Installing an operating system and <em>provisioning</em> the <a data-type="indexterm" data-primary="provisioning"/>hardware is the first layer on top of the servers themselves. Each host must be provisioned and configured, and after the operating system is installed, a <em>configuration management</em> <a data-type="indexterm" data-primary="configuration management tools"/>tool (such as Ansible, Chef, or Puppet) should be used to install all of the applications and set all the necessary configurations.</p>
+
+<p>The hosts need proper <em>host-level monitoring</em> <a data-type="indexterm" data-primary="host-level monitoring"/>(using something like Nagios) and <em>host-level logging</em> so that <a data-type="indexterm" data-primary="host-level logging"/>if anything happens (disk failure, network failure, or if CPU utilization goes through the roof), problems with the hosts can be easily diagnosed, mitigated, and resolved. <a data-type="indexterm" data-primary="microservice ecosystem" data-secondary="hardware layer" data-startref="me1h"/><a data-type="indexterm" data-primary="infrastructure development" data-secondary="hardware" data-startref="id1h"/><a data-type="indexterm" data-primary="hardware" data-startref="h1"/>Host-level monitoring is covered in greater detail in <a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>.</p>
+<aside data-type="sidebar">
+<h5>Summary of Layer 1: The Hardware Layer</h5>
+<p>The hardware layer (layer 1) of the microservice ecosystem contains:</p>
+
+<ul>
+<li>
+<p>The physical servers (owned by the company or rented from cloud providers)</p>
+</li>
+<li>
+<p>Databases (dedicated and/or shared)</p>
+</li>
+<li>
+<p>The operating system</p>
+</li>
+<li>
+<p>Resource isolation and abstraction</p>
+</li>
+<li>
+<p>Configuration management</p>
+</li>
+<li>
+<p>Host-level monitoring</p>
+</li>
+<li>
+<p>Host-level logging</p>
+</li>
+</ul>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Layer 2: Communication</h2>
+
+<p>The <a data-type="indexterm" id="me1cl" data-primary="microservice ecosystem" data-secondary="communication layer"/><a data-type="indexterm" id="id1c" data-primary="infrastructure development" data-secondary="communication"/><a data-type="indexterm" id="c1" data-primary="communication"/>second layer of the microservice ecosystem is the <em>communication layer</em>. The communication layer bleeds into all of the other layers of the ecosystem (including the application platform and microservices layers), because it is where all communication between services is handled; the boundaries between the communication layer and each other layer of the microservice ecosystem are poorly defined. While the boundaries may not be clear, the elements <em>are</em> clear: the second layer of a microservice ecosystem always contains the network, DNS, RPCs and API endpoints, service discovery, service registry, and load balancing.</p>
+
+<p>Discussing the network and DNS elements of the communication layer is beyond the scope of this book, so we will be focusing on RPCs, API endpoints, service discovery, service registry, and load balancing in this section.</p>
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>RPCs, endpoints, and messaging</h3>
+
+<p>Microservices <a data-type="indexterm" id="c1rpc" data-primary="communication" data-secondary="RPCs, endpoints, and messaging"/><a data-type="indexterm" data-primary="remote procedure calls (RPCs)"/>interact with one another over the network using <em>remote procedure calls</em> (RPCs) or <em>messaging</em> <a data-type="indexterm" data-primary="API (application programming interface) endpoints" data-secondary="messaging to"/>to the <em>API endpoints</em> of other microservices (or, as we will see in the case of messaging, to a message broker which will route the message appropriately). The basic idea is this: using a specified protocol, a microservice will send some data in a standardized format over the network to another service (perhaps to another microservice&#8217;s API endpoint) or to a message broker which will make sure that the data is send to another microservice&#8217;s API endpoint.</p>
+
+<p>There are several microservice <a data-type="indexterm" data-primary="communication paradigms"/>communication paradigms. The first is the most common: <em>HTTP+REST/THRIFT</em>. In HTTP+REST/THRIFT, services <a data-type="indexterm" data-primary="HTTP+REST/THRIFT"/> communicate with each other over the network using the <em>Hypertext Transfer Protocol</em> (HTTP), <a data-type="indexterm" data-primary="Hypertext Transfer Protocol  (HTTP)"/>and sending requests and receiving responses to or from either specific <em>representational state transfer</em> (REST) endpoints (using various methods, like GET, POST, etc.) or <a data-type="indexterm" data-primary="Apache  Thrift  endpoints"/>specific <em>Apache Thrift</em> endpoints (or both). The data is usually formatted and sent <a data-type="indexterm" data-primary="JSON data"/>as <em>JSON</em> (or <em>protocol buffers</em>) over HTTP. <a data-type="indexterm" data-primary="representational  state  transfer   (REST)  endpoints"/></p>
+
+<p>HTTP+REST is the most convenient form of microservice communication. There aren&#8217;t any surprises, it&#8217;s easy to set up, and is the most stable and reliable—mostly because it&#8217;s difficult to implement incorrectly. The downside of adopting this paradigm is that it is, by necessity, synchronous (blocking).</p>
+
+<p>The second communication paradigm is <em>messaging</em>. <a data-type="indexterm" data-primary="messaging technologies"/>Messaging is asynchronous (nonblocking), but it&#8217;s a bit more complicated. Messaging works the following way: a microservice will send data (a <em>message</em>) over the network (HTTP or other) to a <em>message broker</em>, which <a data-type="indexterm" data-primary="message broker"/>will route the communication to other microservices.</p>
+
+<p>Messaging comes in several flavors, the two most popular being <em>publish–subscribe</em> (pubsub) messaging <a data-type="indexterm" data-primary="publish–subscribe (pubsub)  messaging"/><a data-type="indexterm" data-primary="request–response messaging"/>and <em>request–response</em> messaging. In pubsub models, clients will <em>subscribe</em> to a <em>topic</em> and will receive a message whenever a <em>publisher</em> <em>publishes</em> a message to that topic. Request–response models are more straightforward, where a client will send a <em>request</em> to a service (or message broker), which will <em>respond</em> with the information requested. There are some messaging technologies that are a unique blend of both models, like <a data-type="indexterm" data-primary="Apache Kafka"/>Apache Kafka. <a data-type="indexterm" data-primary="Celery"/>Celery and <a data-type="indexterm" data-primary="Redis"/>Redis (or Celery with <a data-type="indexterm" data-primary="RabbitMQ"/>RabbitMQ) can be used for messaging (and task processing) for microservices written in Python: Celery processes the tasks and/or messages using Redis or RabbitMQ as the broker.</p>
+
+<p>Messaging comes with several significant downsides that must be mitigated. Messaging can be just as <a data-type="indexterm" data-primary="scalability" data-secondary="of messaging"/>scalable (if not more scalable) than HTTP+REST solutions, if it is architected for scalability from the get-go. Inherently, messaging is not as easy to change and update, and its centralized nature (while it may seem like a benefit) can lead to its queues and brokers becoming points of failure for the entire ecosystem. The asynchronous nature of messaging can lead to race conditions and endless loops if not prepared for. If a messaging system is implemented with protections against these problems, it can become as stable and efficient as a synchronous solution.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Service discovery, service registry, and load balancing</h3>
+
+<p>In <a data-type="indexterm" id="c1sdsralb" data-primary="communication" data-secondary="service discovery, service registry, and load balancing"/><a data-type="indexterm" data-primary="service registry"/><a data-type="indexterm" data-primary="service discovery"/>monolithic architecture, traffic only needs to be sent to one application and distributed appropriately to the servers hosting the application. In microservice architecture, traffic needs to be routed appropriately to a large number of different applications, and then distributed appropriately to the servers hosting each specific microservice. In order for this to be done efficiently and effectively, microservice architecture requires three technologies be implemented in the communication layer: <em>service discovery</em>, <em>service registry</em>, and <em>load balancing</em>.</p>
+
+<p>In general, when a microservice A needs to make a request to another microservice B, microservice A needs to know the IP address and port of a specific instance where microservice B is hosted. More specifically, the communication layer between the microservices needs to know the IP addresses and ports of these microservices so that the requests between them can be routed appropriately. This is accomplished through <em>service discovery</em> (such as etcd, Consul, Hyperbahn, or ZooKeeper), which ensures that requests are routed to exactly where they are supposed to be sent and that (very importantly) they are only routed to healthy instances. Service discovery requires a <em>service registry</em>, which is a database that tracks all ports and IPs of all microservices across the ecosystem.</p>
+<div data-type="tip"><h1>Dynamic Scaling and Assigned Ports</h1>
+<p>In <a data-type="indexterm" data-primary="scaling" data-secondary="dynamic"/><a data-type="indexterm" data-primary="dynamic scaling"/>microservice architecture, ports and IPs can (and do) change all of the time, especially as microservices are scaled and re-deployed (especially with a hardware abstraction layer like Apache Mesos). One way to approach the discovery and routing is to assign static ports (both frontend and backend) to each microservice.</p>
+</div>
+
+<p>Unless you have each microservice hosted on only one instance (which is highly unlikely), you&#8217;ll need <em>load balancing</em> <a data-type="indexterm" data-primary="load balancing"/>in place in various parts of the communication layer across the microservice ecosystem. Load balancing works, at a very high level, like this: if you have 10 different instances hosting a microservice, load-balancing software (and/or hardware) will ensure that the traffic is distributed (balanced) across all of the instances. Load balancing will be needed at every location in the ecosystem in which a request is being sent to an application, which means that any large microservice ecosystem will contain many, many layers of load balancing. <a data-type="indexterm" data-primary="communication" data-secondary="service discovery, service registry, and load balancing" data-startref="c1sdsralb"/>Commonly used load balancers for this purpose are Amazon Web Services <a data-type="indexterm" data-primary="Elastic Load Balancer (AWS ELB)"/>Elastic Load Balancer, <a data-type="indexterm" data-primary="Netflix Eureka"/><a data-type="indexterm" data-primary="Eureka"/>Netflix Eureka, <a data-type="indexterm" data-primary="HAProxy"/>HAProxy, <a data-type="indexterm" data-primary="microservice ecosystem" data-secondary="communication layer" data-startref="me1cl"/><a data-type="indexterm" data-primary="infrastructure development" data-secondary="communication" data-startref="id1c"/><a data-type="indexterm" data-primary="communication" data-startref="c1"/>and <a data-type="indexterm" data-primary="Nginx"/>Nginx.</p>
+<aside data-type="sidebar">
+<h5>Summary of Layer 2: The Communication Layer</h5>
+<p>The communication layer (layer 2) of the microservice ecosystem contains:</p>
+
+<ul>
+<li>
+<p>Network</p>
+</li>
+<li>
+<p>DNS</p>
+</li>
+<li>
+<p>Remote procedure calls (RPCs)</p>
+</li>
+<li>
+<p>Endpoints</p>
+</li>
+<li>
+<p>Messaging</p>
+</li>
+<li>
+<p>Service discovery</p>
+</li>
+<li>
+<p>Service registry</p>
+</li>
+<li>
+<p>Load balancing</p>
+</li>
+</ul>
+</aside>
+</section>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Layer 3: The Application Platform</h2>
+
+<p>The <em>application platform</em> <a data-type="indexterm" id="me1ap" data-primary="microservice ecosystem" data-secondary="application platform layer"/><a data-type="indexterm" id="ap1" data-primary="application platform"/><a data-type="indexterm" id="id1ap" data-primary="infrastructure development" data-secondary="application platform"/>is the third layer of the microservice ecosystem and contains all of the internal tooling and services that are independent of the microservices. This layer is filled with centralized, ecosystem-wide tools and services that must be built in such a way that microservice development teams do not have to design, build, or maintain anything except their own microservices.</p>
+
+<p>A good application platform is one with <em>self-service internal tools</em> for developers, a standardized <em>development process</em>, a centralized and automated <em>build and release system</em>, <em>automated testing</em>, a standardized and centralized <em>deployment solution</em>, and centralized <em>logging and microservice-level monitoring</em>. Many of the details of these elements are covered in later chapters, but we&#8217;ll cover several of them briefly here to provide some introduction to the basic concepts.</p>
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Self-service internal development tools</h3>
+
+<p>Quite <a data-type="indexterm" id="ssidt1" data-primary="self-service internal development tools"/>a few things can be categorized as <em>self-service internal development tools</em>, and which particular things fall into this category depends not only on the needs of the developers, but the level of abstraction and sophistication of both the infrastructure and the ecosystem as a whole. The key to determining which tools need to be built is to first divide the realms of responsibility and then determine which tasks developers need to be able to accomplish in order to design, build, and maintain their services.</p>
+
+<p>Within a company that has adopted microservice architecture, responsibilities need to be carefully delegated to different engineering teams. An easy way to do this is to create an engineering suborganization for each layer of the microservice ecosystem, along with other teams that bridge each layer. Each of these engineering organizations, functioning semi-independently, will be responsible for everything within their layer: TechOps teams will be responsible for layer 1, infrastructure teams will be responsible for layer 2, application platform teams will be responsible for layer 3, and microservice teams will be responsible for layer 4 (this is, of course, a very simplified view, but you get the general idea).</p>
+
+<p>Within this organizational scheme, any time that an engineer working on one of the higher layers needs to set up, configure, or utilize something on one of the lower layers, there should be a self-service tool in place that the engineer can use. For example, the team working on messaging for the ecosystem should build a self-service tool so that if a developer on a microservice team needs to configure messaging for her service, she can easily configure the messaging without having to understand all of the intricacies of the messaging system.</p>
+
+<p>There are many reasons to have these centralized, self-service tools in place for each layer. In a diverse microservice ecosystem, the average engineer on any given team will have no (or very little) knowledge of how the services and systems in other teams work, and there is simply no way they could become experts in each service and system while working on their own—it simply can&#8217;t be done. Each individual developer will know almost nothing except her own service, but together, all of the developers working within the ecosystem will collectively know everything. Rather than trying to educate each developer about the intricacies of each tool and service within the ecosystem, build sustainable, easy-to-use user interfaces for every part of the ecosystem, and then educate and train them on how to use those. Turn everything into a black box, and document exactly how it works and how to use it.</p>
+
+<p>The second reason to build these tools and build them well is that, in all honesty, you do not want a developer from another team to be able to make significant changes to your service or system, especially not one that could cause an outage. This is especially true and compelling for services and systems belonging to the lower layers (layer 1, layer 2, and layer 3). Allowing nonexperts to make changes to things within these layers, or requiring (or worse, expecting) them to become experts in these areas is a recipe for disaster. An example of where this can go terribly wrong is in configuration management: <a data-type="indexterm" data-primary="configuration management"/>allowing developers on microservice teams to make changes to system configurations without having the expertise to do so can and will lead to large-scale production outages if a change is made that affects something other than their <a data-type="indexterm" data-primary="self-service internal development tools" data-startref="ssidt1"/>service alone.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>The development cycle</h3>
+
+<p>When <a data-type="indexterm" data-primary="development cycle"/>developers are making changes to existing microservices, or creating new ones, development can be made more effective by streamlining and standardizing the development process and automating away as much as possible. The details of standardizing the process of stable and reliable development itself are covered in <a data-type="xref" data-xrefstyle="chap-num-title" href="#scalability_performance.asciidoc">#scalability_performance.asciidoc</a>, but there are several things that need to be in place within the third layer of a microservice ecosystem in order for stable and reliable development to be possible.</p>
+
+<p>The first requirement is a centralized <em>version control system</em> where all code  <a data-type="indexterm" data-primary="version control systems"/>can be stored, tracked, versioned, and searched. This is usually accomplished through something like <a data-type="indexterm" data-primary="GitHub"/>GitHub, or a self-hosted git or svn repository linked to some kind of collaboration tool like <a data-type="indexterm" data-primary="Phabricator"/>Phabrictor, and these tools make it easy to maintain and review code.</p>
+
+<p>The second requirement is a stable, efficient <em>development environment</em>. Development environments <a data-type="indexterm" data-primary="development environments"/>are notoriously difficult to implement in microservice ecosystems, due to the complicated dependencies each microservice will have on other services, but they are absolutely essential. Some engineering organizations prefer when all development is done locally (on a developer&#8217;s laptop), but this can lead to bad deploys because it doesn&#8217;t give the developer an accurate picture of how her code changes will perform in the production world. The most stable and reliable way to design a development environment is to create a mirror of the production environment (one that is not staging, nor canary, nor production) containing all of the intricate dependency chains.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Test, build, package, and release</h3>
+
+<p>The <em>test, build, package, and release steps</em> in between development and deployment should be standardized and centralized as much as possible. After the development cycle, when any code change has been committed, all the necessary tests should be run, and new releases should be automatically built and packaged. <em>Continuous integration</em> tooling exists for precisely this purpose, and existing solutions (like Jenkins) are very advanced and easy to configure. These tools make it easy to automate the entire process, leaving very little room for human error.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Deployment pipeline</h3>
+
+<p>The <em>deployment pipeline</em> <a data-type="indexterm" data-primary="deployment pipeline"/>is the process by which new code makes its way to production servers after the development cycle and following the test, build, package, and release steps. Deployment can quickly become very complicated in a microservice ecosystem, where hundreds of deployments per day are not out of the ordinary. Building tooling around deployment, and standardizing deployment practices for all development teams is often necessary. The principles of building stable and reliable (production-ready) deployment pipelines are covered in detail in <a data-type="xref" data-xrefstyle="chap-num-title" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Logging and monitoring</h3>
+
+<p>All microservices should have <em>microservice-level logging</em> <a data-type="indexterm" data-primary="microservice-level logging"/>of all requests made to the microservice (including all relevant and important information) and its responses. Due to the fast-paced nature of microservice development, it&#8217;s often impossible to reproduce bugs in the code because it&#8217;s impossible to reconstruct the state of the system at the time of failure. Good microservice-level logging gives developers the information they need to fully understand the state of their service at a certain time in the past or present. <em>Microservice-level monitoring</em> of all <em>key metrics</em> of the microservices is essential for similar reasons: accurate, real-time monitoring allows developers to always know the health and status of their service. <a data-type="indexterm" data-primary="infrastructure development" data-seealso="microservice ecosystem" data-startref="id1"/>Microservice-level logging and monitoring are covered in greater <a data-type="indexterm" data-primary="infrastructure development" data-secondary="application platform" data-startref="id1ap"/><a data-type="indexterm" data-primary="microservice ecosystem" data-secondary="application platform layer" data-startref="me1ap"/><a data-type="indexterm" data-primary="application platform" data-startref="ap1"/>detail in <a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>.</p>
+<aside data-type="sidebar">
+<h5>Summary of Layer 3: The Application Platform Layer</h5>
+<p>The application platform layer (layer 3) of the microservice ecosystem contains:</p>
+
+<ul>
+<li>
+<p>Self-service internal development tools</p>
+</li>
+<li>
+<p>Development environment</p>
+</li>
+<li>
+<p>Test, package, build, and release tools</p>
+</li>
+<li>
+<p>Deployment pipeline</p>
+</li>
+<li>
+<p>Microservice-level logging</p>
+</li>
+<li>
+<p>Microservice-level monitoring</p>
+</li>
+</ul>
+</aside>
+</section>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Layer 4: Microservices</h2>
+
+<p>At <a data-type="indexterm" id="me1ml" data-primary="microservice ecosystem" data-secondary="microservice layer"/>the very top of the microservice ecosystem lies the <em>microservice layer</em> (<em>layer 4</em>). This layer is where the microservices—and anything specific to them—live, completely abstracted away from the lower infrastructure layers. Here they are abstracted from the hardware, from deployment, from service discovery, from load balancing, and from communication. The only things that are not abstracted away from the microservice layer are the configurations specific to each service for using the tools.</p>
+
+<p>It is common practice in software engineering to centralize all application configurations so that the configurations for a specific tool or set of tools (like configuration management, resource isolation, or deployment tools) are all stored with the tool itself. For example, custom deployment configurations for applications are often stored not with the application code but with the code for the deployment tool. This practice works well for monolithic architecture, and even for small microservice ecosystems, but in very large microservice ecosystems containing hundreds of microservices and dozens of internal tools (each with their own custom configurations), this practice becomes rather messy: developers on microservice teams are required to make changes to codebases of tools in the layers below, and oftentimes will forget where certain configurations live (or that they exist at all). To mitigate this problem, all microservice-specific configurations can live in the repository of the microservice and should be accessed there by the tools and systems of the layers <a data-type="indexterm" data-primary="microservice ecosystem" data-secondary="microservice layer" data-startref="me1ml"/><a data-type="indexterm" data-primary="microservice ecosystem" data-startref="me1"/>below.</p>
+<aside data-type="sidebar">
+<h5>Summary of Layer 4: The Microservice Layer</h5>
+<p>The microservice layer (layer 4) of the microservice ecosystem contains:</p>
+
+<ul>
+<li>
+<p>The microservices</p>
+</li>
+<li>
+<p>All microservice-specific configurations</p>
+</li>
+</ul>
+</aside>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1" id="organizational_challenges">
+<h1>Organizational Challenges</h1>
+
+<p>The <a data-type="indexterm" id="oc1" data-primary="organizational challenges"/>adoption of microservice architecture resolves the most pressing challenges presented by monolithic application architecture. Microservices aren&#8217;t plagued by the same scalability challenges, the lack of efficiency, or the difficulties in adopting new technologies: they are optimized for scalability, optimized for efficiency, optimized for developer velocity. In an industry where new technologies rapidly gain market traction, the pure organizational cost of maintaining and attempting to improve a cumbersome monolithic application is simply not practical. With these things in mind, it&#8217;s hard to imagine why anyone would be reluctant to split a monolith into microservices, why anyone would be wary about building a microservice ecosystem from the ground up.</p>
+
+<p>Microservices seem like a magical (and somewhat obvious) solution, but we know better than that. In <em>The Mythical Man-Month</em>, <a data-type="indexterm" data-primary="The  Mythical Man-Month (Brooks)" data-primary-sortas="Mythical Man-Month"/><a data-type="indexterm" data-primary="Brooks, Frederick"/>Frederick Brooks explained why there are no silver bullets in software engineering, an idea he summarized as follows: "There is no single development, in either technology or management technique, which by itself promises even one order-of-magnitude improvement within a decade in productivity, in reliability, in simplicity."</p>
+
+<p>When we find ourselves presented with technology that promises to offer us drastic improvements, we need to look for the trade-offs. Microservices promise greater scalability and greater efficiency, but we know that those will come at a cost to some part of the overall system.</p>
+
+<p>There are four especially significant trade-offs that come with microservice architecture. <a data-type="indexterm" data-primary="microservice architecture" data-secondary="trade-offs of" data-see="organizational challenges"/>The first is the change in organizational structure that tends toward isolation and poor cross-team communication—a consequence of the inverse of <em>Conway&#8217;s Law</em>. The second is the dramatic increase in <em>technical sprawl</em>, sprawl that is extraordinarily costly not only to the entire organization but which also presents significant costs to each engineer. The third trade-off is the increased <em>ability of the system to fail</em>. The fourth is the <em>competition for engineering and infrastructure resources</em>.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>The Inverse Conway&#8217;s Law</h2>
+
+<p>The <a data-type="indexterm" id="oc1icl" data-primary="organizational challenges" data-secondary="Inverse Conway&#8217;s Law"/><a data-type="indexterm" id="icl1" data-primary="Inverse Conway&#8217;s Law"/>idea behind <em>Conway&#8217;s Law</em> (named after programmer Melvin Conway in 1968) <a data-type="indexterm" data-primary="Conway&#8217;s Law" data-seealso="Inverse Conway&#8217;s Law"/>is this: that the architecture of a system will be determined by the communication and organizational structures of the company. The inverse of Conway&#8217;s Law (which we&#8217;ll call the <em>Inverse Conway&#8217;s Law</em>) is also valid and is especially relevant to the microservice ecosystem: the organizational structure of a company is determined by the architecture of its product. Over 40 years after Conway&#8217;s Law was first introduced, both it and its inverse still appear to hold true. Microsoft&#8217;s organizational structure, if sketched out as if it were the architecture of a system, looks remarkably like the architecture of its products—the same goes for Google, for Amazon, and for every other large technology company. Companies that adopt microservice architecture will never be an exception to this rule.</p>
+
+<p>Microservice architecture is comprised of a large number of small, isolated, independent microservices. The Inverse Conway&#8217;s Law demands that the organizational structure of any company using microservice architecture will be made up of a large number of very small, isolated, and independent teams. The <a data-type="indexterm" data-primary="team structures"/>team structures that spring from this inevitably lead to siloing and sprawl, problems that are made worse every time the microservice ecosystem becomes more sophisticated, more complex, more concurrent, and more efficient.</p>
+
+<p>Inverse Conway&#8217;s Law also means that developers will be, in some ways, just like microservices: they will be able to do one thing, and (hopefully) do that one thing very well, but they will be isolated (in responsibility, in domain knowledge, and experience) from the rest of the ecosystem. When considered together, all of the developers <em>collectively</em> working within a microservice ecosystem will know everything there is to know about it, but individually they will be extremely specialized, knowing only the pieces of the ecosystem they are responsible for.</p>
+
+<p>This poses an unavoidable organizational problem: even though microservices must be developed in isolation (leading to isolated, siloed teams), they don&#8217;t live in isolation and must interact with one another seamlessly if the overall product is to function at all. This requires that these isolated, independently functioning teams work together closely and often—something that is difficult to accomplish, given that most team&#8217;s goals and projects (codified in their team&#8217;s objectives and key results, or OKRs) are specific to a particular microservice they are working on.</p>
+
+<p>There is also a large communication gap between microservice teams and infrastructure teams that needs to be closed. Application platform teams, for example, need to build platform services and tools that all of the microservice teams will use, but gaining the requirements and needs from hundreds of microservice teams before building one small project can take months (even years). Getting developers and infrastructure teams to work together is not an easy task.</p>
+
+<p>There&#8217;s a related problem that arises thanks to Inverse Conway&#8217;s Law, one that is only rarely found in companies with monolithic architecture: the difficulty of running an operations organization. With a monolith, an operations organization can easily be staffed and on call for the application, but this is very difficult to achieve with microservice architecture because it would require every single microservice to be staffed by both a development team <em>and</em> an operational team. Consequently, microservice development teams need to be responsible for the operational duties and tasks associated with their microservice. There is no separate ops org to take over the on call, no separate ops org responsible for monitoring: developers will need to be on call <a data-type="indexterm" data-primary="organizational challenges" data-secondary="Inverse Conway&#8217;s Law" data-startref="oc1icl"/><a data-type="indexterm" data-primary="Inverse Conway&#8217;s Law" data-startref="icl1"/>for their services.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Technical Sprawl</h2>
+
+<p>The <a data-type="indexterm" id="oc1ts" data-primary="organizational challenges" data-secondary="technical sprawl"/><a data-type="indexterm" id="ts1" data-primary="technical sprawl"/>second trade-off, <em>technical sprawl</em>, is related to the first. While Conway&#8217;s Law and its inverse predict organizational sprawl and siloing for microservices, a second type of sprawl (related to technologies, tools, and the like) is also unavoidable in microservice architecture. There are many different ways in which technical sprawl can manifest. We&#8217;ll cover a few of the most common ways here.</p>
+
+<p>It&#8217;s easy to see why microservice architecture leads to technical sprawl if we consider a large microservice ecosystem, one containing 1,000 microservices. Suppose each of these microservices is staffed by a development team of six developers, and each developer uses their own set of favorite tools, favorite libraries, and works in their own favorite languages. Each of these development teams has their own way of deploying, their own specified metrics to monitor and alert on, their own external libraries and internal dependencies they use, custom scripts to run on production machines, and so on.</p>
+
+<p>If you have a thousand of these teams, this means that within one system there are a thousand ways to do one thing. There will be a thousand ways to deploy, a thousand libraries to maintain, a thousand different ways of alerting and monitoring and testing and handling outages. The only way to cut down on technical sprawl is through standardization at every level of the microservice ecosystem.</p>
+
+<p>There&#8217;s another kind of technical sprawl associated with language choice. Microservices infamously come with the promise of greater developer freedom, freedom to choose whichever languages and libraries one wants. This is possible in principle, and can be true in practice, but as a microservice ecosystem grows it often becomes impractical, costly, and dangerous. To see why this can become a problem, consider the following scenario. Suppose we have a microservice ecosystem containing 200 services, and imagine that some of these microservices are written in Python, others in JavaScript, some in Haskell, a few in Go, and a couple more in Ruby, Java, and <span class="keep-together">C++</span>. For each internal tool, for each system and service within every layer of the ecosystem, libraries will have to be written for each one of these languages.</p>
+
+<p>Take a moment to contemplate the sheer amount of maintenance and development that will have to be done in order for each language to receive the support it requires: it&#8217;s extraordinary, and very few engineering organizations could afford to dedicate the engineering resources necessary to make it happen. It&#8217;s more realistic to choose a small number of supported languages and ensure that all libraries and tools are compatible with and exist for these languages than to attempt to support a large number of languages.</p>
+
+<p>The last type of technical sprawl we will cover here is technical debt, which usually refers to work that needs to be done because something was implemented in a way that got the job done quickly, but not in the best or most optimal way. Given that microservice development teams can churn out new features at a fast pace, technical debt often builds up quietly in the background. When outages happen, when things break, any work that comes out of an incident review will only rarely be the best overall solution: as far as microservice development teams are concerned, whatever fixes (or fixed) the problem quickly and in the moment was good enough, and any better solutions are pawned off <a data-type="indexterm" data-primary="organizational challenges" data-secondary="technical sprawl" data-startref="oc1ts"/><a data-type="indexterm" data-primary="technical sprawl" data-startref="ts1"/>to the future.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>More Ways to Fail</h2>
+
+<p>Microservices <a data-type="indexterm" data-primary="organizational challenges" data-secondary="mitigating failure"/><a data-type="indexterm" data-primary="fault tolerance" data-secondary="failure detection and mitigation"/>are large, complex, distributed systems with many small, independent pieces that are constantly changing. The reality of working with complex systems of this sort is that individual components will fail, they will fail often, and they will fail in ways that nobody could have predicted. This is where the third trade-off comes into play: microservice architecture introduces more ways your system can fail.</p>
+
+<p>There are ways to prepare for failure, to mitigate failures when they occur, and to test the limits and boundaries of both the individual components and the overall ecosystem, which I cover in <a data-type="xref" data-xrefstyle="chap-num-title" href="#fault_tolerance.asciidoc">#fault_tolerance.asciidoc</a>. However, it is important to understand that no matter how many resiliency tests you run, no matter how many failures and catastrophe scenarios you&#8217;ve scoped out, you cannot escape the fact that the system <em>will</em> fail. You can only do your best to prepare for when it does.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Competition for Resources</h2>
+
+<p>Just <a data-type="indexterm" data-primary="organizational challenges" data-secondary="competition for resources"/><a data-type="indexterm" data-primary="resources, competition for"/><a data-type="indexterm" data-primary="competition for resources"/>like any other ecosystem in the natural world, competition for resources in the microservice ecosystem is fierce. Each engineering organization has finite resources: it has finite engineering resources (teams, developers) and finite hardware and infrastructure resources (physical machines, cloud hardware, database storage, etc.), and each resource costs the company a great deal of money.</p>
+
+<p>When your microservice ecosystem has a large number of microservices and a large and sophisticated application platform, competition between teams for hardware and infrastructure resources is inevitable: every service, every tool will be presented as equally important, its scaling needs presented as being of the highest priority.</p>
+
+<p>Likewise, when application platform teams are asking for specifications and needs from microservice teams so that they can design their systems and tools appropriately, every microservice development team will argue that their needs are the most important and will be disappointed (and potentially very frustrated) if they are not included. This kind of competition for engineering resources can lead to resentment between teams.</p>
+
+<p>The last kind of competition for resources is perhaps the most obvious one: the competition between managers, between teams, and between different engineering departments/organization for engineering headcount. Even with the increase in computer science graduates and the rise of developer bootcamps, truly great developers are difficult to find, and represent one of the most irreplaceable and scarce resources. When there are hundreds or thousands of teams that could use an extra engineer or two, every single team will insist that their team needs an extra engineer more than any of the other teams.</p>
+
+<p>There is no way to avoid competition for resources, though there are ways to mitigate competition somewhat. The most effective seems to be organizing or categorizing teams in terms of their importance and criticality to the overall business, and then giving teams access to resources based on their priority or importance. There are downsides to this, because it tends to result in poorly staffed development tools teams, and in projects whose importance lies in shaping the future (such as adopting new infrastructure technologies) <a data-type="indexterm" data-primary="organizational challenges" data-startref="oc1"/>being abandoned.</p>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+</section>

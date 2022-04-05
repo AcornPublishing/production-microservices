@@ -1,0 +1,156 @@
+[preface]
+== Preface
+
+This book was born out of a production-readiness initiative I began running several months after I joined Uber Technologies as a site reliability engineer (SRE). Uber's gigantic, monolithic API was slowly being broken into microservices, and at the time I joined, there were over a thousand microservices that had been split from the API and were running alongside it. Each of these microservices was designed, built, and maintained by an owning development team, and over 85% of these services had little to no SRE involvement, nor any access to SRE resources.
+
+Hiring SREs and building ((("site reliability engineers (SREs)")))SRE teams is an absurdly difficult task, because SREs are probably the hardest type of engineers to find: site reliability engineering as a field is still relatively new, and SREs must be experts (at least to some degree) in software engineering, systems engineering, and distributed systems architecture. There was no way to quickly staff all of the teams with their own embedded SRE team, and so my team (the Consulting SRE Team) was born. Our directive from above was simple: find a way to drive high standards across the 85% of microservices that had no SRE involvement. 
+
+Our mission was simple, and the directive was vague enough that it allowed me and my team a considerable amount of freedom to define a set of standards ((("microservices", "standards creation for", id="mspscf")))that every microservice at Uber could follow. Coming up with high standards that could apply to every single microservice running within this large engineering organization was not easy, and so, with some help from my amazing colleague Rick Boone (whose high standards for the microservices he supported inspired this book), I created a detailed checklist of the standards that I believed every service at Uber should meet before being allowed to host production traffic. 
+
+Doing so required identifying a set of overall, umbrella principles that every specific requirement would fall under, ((("microservices", "umbrella principles for")))and we came up with eight such principles: every microservice at Uber, we said, should be _stable_, _reliable_, _scalable_, _fault tolerant_, _performant_, _monitored_, _documented_, and _prepared for any catastrophe_. Under each of these principles were separate criteria that defined what it meant for a service to be stable, reliable, scalable, fault tolerant, performant, monitored, documented, and prepared for any catastrophe. Importantly, we demanded that each principle be quantifiable, and that each criterion provide us with measurable results that dramatically increased the availability of our microservices. A service that met these criteria, ((("production-readiness", "defining")))a service that fit these requirements, we deemed _production-ready_. 
+
+Driving these standards across teams in an effective and efficient way was the next step. I created a careful process in which SRE teams met with business-critical services (services whose outages would bring the application down), ran architecture reviews with the teams, put together audits of their services (simple checklists that said "yes" or "no" to whether the service met each production-readiness requirement), created detailed roadmaps (step-by-step guides that detailed how to bring the service in question to a production-ready state), and assigned production-readiness scores to each service. 
+
+Running the ((("architecture reviews")))architecture reviews was the most important part of the process: my team would gather all of the developers working on a service in a conference room and ask them to whiteboard the architecture of their service in 30 minutes or less. Doing this allowed both my team and the host team to quickly and easily identify where and why the service was failing: when a microservice was diagrammed in all of its glory (endpoints, request flows, dependencies and all), every point of failure stood out like a sore thumb. 
+
+Every architecture review produced a great deal of work. After each review, we'd work through the checklist and see if the service met any of the production-readiness requirements, and then we'd share this audit out with the managers and developers of the team. Scoring was added to the audits when I realized that the _production-ready or not_ idea was simply not granular enough to be useful when we evaluated the production-readiness of services, so each requirement was assigned a certain ((("production-readiness", "audits and roadmaps to")))number of points and then an overall score given to the service. 
+
+From the audits came roadmaps. Roadmaps contained a list of the production-readiness requirements that the service did not meet, along with links to information about recent outages caused by not meeting that requirement, descriptions of the work that needed to be done in order to meet the requirement, a link to an open task, and the name of the developer(s) assigned to the relevant task. 
+
+After doing my own production-readiness check on this process (also known as Susan-Fowler's-production-readiness-process-as-a-service), I knew that the next step would need to be the automation of the entire process that would run on all Uber microservices, all of the time. At the time of the writing of this book, this entire production-readiness system is being automated by an amazing SRE team at Uber led by the fearless Roxana del Toro. 
+
+Each of the production-readiness requirements within the production-readiness standards and the details of their implementation came out of countless hours of careful, deliberate work by myself and my colleagues in the Uber SRE organization. In making the list of requirements, and in trying to implement them across all Uber microservices, we took countless notes, argued with one another at great length, and researched whatever we could find in the current microservice literature (which is very sparse, and almost nonexistent). I met with a wide variety of microservice developer teams, both at Uber and at other companies, trying to determine how microservices could be standardized and whether there existed a universal set of standardization principles that could be applied to every microservice at every company and produce measurable, business-impactful results. From those notes, arguments, meetings, and research came the foundations of this book.
+
+It wasn't until after I began sharing my work with site reliability engineers and software engineers at other companies in the Bay Area that I realized how novel it was, not only in the SRE world, but in the tech industry as a whole. When engineers started asking me for every bit of information and guidance I could give them on standardizing their microservices and making their microservices production-ready, I began writing. 
+
+At the time of writing, there exists very little literature on microservice standardization and very few guides to maintaining and building the microservice ecosystem. Moreover, there are no books that answer the question many engineers have after splitting their monolithic application into microservices: what do we do next? The ambitious goal of this book is to fill that gap, and to answer precisely that question. In a nutshell, this is the book I wish that I had when I began standardizing microservices ((("microservices", "standards creation for", startref="mspscf")))at Uber. 
+
+=== Who This Book Is Written For
+
+This book is primarily written for software engineers and site reliability engineers who have either split a monolith and are wondering "what's next?", or who are building microservices from the ground up and want to design stable, reliable, scalable, fault-tolerant, performant microservices from the get-go. 
+
+However, the relevance of the principles within this book is not limited to the primary audience. Many of the principles, from good monitoring to successfully scaling an application, can be applied to improve services and applications of any size and architecture at any organization. Engineers, engineering managers, product managers, and high-level company executives may find this book useful for a variety of reasons, including determining standards for their application(s), understanding changes in organizational structure that result from architecture decisions, or for determining and driving the architectural and operational vision of their engineering organization(s). 
+
+I do assume that the reader is familiar with the basic concepts of microservices, with microservice architecture, and with the fundamentals of modern distributed systems—readers who understand these concepts well will gain the most from this book. For readers unfamiliar with these topics, I've dedicated the first chapter to a short overview of microservice architecture, the microservice ecosystem, organizational challenges that accompany microservices, and the nitty-gritty reality of breaking a monolithic application into microservices. 
+
+=== What This Book Is Not
+
+This book is not a step-by-step how-to guide: it is not an explicit tutorial on how to do each of the things covered in its chapters. Writing such a tutorial would require many, many volumes: each section of each of the chapters within this book could be expanded into its own book. 
+
+As a result, this is a highly abstract book, written to be general enough that the lessons learned here can be applied to nearly every microservice at nearly every company, yet specific and granular enough that it can be incorporated into an engineering organization and provide real, tangible guidance on how to improve and standardize microservices. Because the microservice ecosystem will differ from company to company, there isn't any benefit to be found in taking a step-by-step authoritative or educational approach. Instead, I've decided to introduce concepts, explain their importance to building production-ready microservices, offer examples of each concept, and share strategies for their implementation. 
+
+Importantly, this book is not an encyclopedic account of all the possible ways that microservices and microservice ecosystems can be built and run. I will be the first to admit that there are many valid ways to build and run microservices and microservice ecosystems. (For example, there are many different ways to test new builds aside from the staging-canary-production approach that I introduce and advocate for in pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>]). But some ways are better than others, and I have tried as hard as possible to present only the best ways to build and run production-ready microservices and apply each production-readiness principle across engineering organizations. 
+
+In addition, technology moves and changes remarkably fast. Whenever and wherever possible, I have tried to avoid limiting the reader to an existing technology or set of technologies to implement. For example, rather than advocating that every microservice use Kafka for logging, I present the important aspects of production-ready logging and leave the choice of specific technology and the actual implementation to the reader. 
+
+Finally, this book is not a description of the Uber engineering organization. The principles, standards, examples, and strategies are not specific to Uber nor exclusively inspired by Uber: they have been developed and inspired by microservices of many technology companies and can be applied to any microservice ecosystem. This is not a descriptive or historical account, but a prescriptive guide to building production-ready microservices. 
+
+=== How To Use This Book
+
+There are several ways you can use this book. 
+
+The first approach is the least involved one: to read only the chapters you are interested in, and skim through (or skip) the rest. There is much to be gained from this approach: you'll find yourself introduced to new concepts, gain insight on concepts you may be familiar with, and walk away with new ways to think about aspects of software engineering and microservice architecture that you may find useful in your day-to-day life and work. 
+
+Another approach is a slightly more involved one, in which you can skim through the book, reading carefully the sections that are relevant to your needs, and then apply some of the principles and standards to your microservice(s). For example, if your microservice(s) is in need of improved monitoring, you could skim through the majority of the book, reading only pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>], closely and then use the material in this chapter to improve the monitoring, alerting, and outage response processes of your service(s). 
+
+The last approach you could take is (probably) the most rewarding one, and the one you should take if your goal is to fully standardize either the microservice you are responsible for or all of the microservices at your company so that it or they are truly production-ready. If your goal is to make your microservice(s) stable, reliable, scalable, fault tolerant, performant, properly monitored, well documented, and prepared for any catastrophe, you'll want to take this approach. To accomplish this, each chapter should be read carefully, each standard understood, and each requirement adjusted and applied to fit the needs of your microservice(s). 
+
+At the end of each of the standardization chapters (Chapters pass:[<a data-type="xref" data-xrefstyle="select:labelnumber" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>-<a data-type="xref" data-xrefstyle="select:labelnumber" href="#documentation.asciidoc">#documentation.asciidoc</a>]), you will find a section titled "Evaluate Your Microservice," which contains a short list of questions you can ask about your microservice. The questions are organized by topic so that you (the reader) can quickly pick out the questions relevant to your goals, answer them for your microservice, and then determine what steps you can take to make your microservice production-ready. At the end of the book, you will find two appendixes (pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#production_readiness_checklist">#production_readiness_checklist</a>, and <a data-type="xref" data-xrefstyle="chap-num-title" href="#evaluate_your_microservice">#evaluate_your_microservice</a>]) that will help you keep track of the production-readiness standards and the "Evaluate Your Microservices" questions that are scattered throughout the book. 
+
+=== How This Book Is Structured
+
+As the title suggests, pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#microservices.asciidoc">#microservices.asciidoc</a>], is an introduction to microservices. It covers the basics of microservice architecture, covers some of the details of splitting a monolith into microservices,  introduces the four layers of a microservice ecosystem, and concludes with a section devoted to illuminating some of the organizational challenges and trade-offs that come with adopting microservice architecture. 
+
+In pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#production_readiness.asciidoc">#production_readiness.asciidoc</a>], the challenges of microservice standardization are presented, and the eight production-readiness standards, all driven by microservice availability, are introduced. 
+
+pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>], is all about the principles of building stable and reliable microservices. The development cycle, deployment pipeline, dealing with dependencies, routing and discovery, and stable and reliable deprecation and decommissioning of microservices are all covered here. 
+
+pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#scalability_performance.asciidoc">#stability_reliability.asciidoc</a>], narrows in on the requirements for building scalable and performant microservices, including knowing the growth scales of microservices, using resources efficiently, being resource aware, capacity planning, dependency scaling, traffic management, task handling and processing, and scalable data storage.
+
+pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#fault_tolerance.asciidoc">#fault_tolerance.asciidoc</a>], covers the principles of building fault-tolerant microservices that are prepared for any catastrophe, including common catastrophes and failure scenarios, strategies for failure detection and remediation, the ins and outs of resiliency testing, and ways to handle incidents and outages. 
+
+pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>], is all about the nitty-gritty details of microservice monitoring and how to avoid the complexities of microservice monitoring through standardization. Logging, creating useful dashboards, and appropriately handling alerting are all covered in this chapter. 
+
+Last but not least is pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#documentation.asciidoc">#documentation.asciidoc</a>], which dives into appropriate microservice documentation and ways to increase architectural and operational understanding in development teams and throughout the organization, and also contains practical strategies for implementing production-readiness standards across an engineering organization. 
+
+There are two appendixes at the end of this book. pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#production_readiness_checklist">#production_readiness_checklist</a>], is the checklist described at the end of pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#documentation.asciidoc">#documentation.asciidoc</a>], and is a concise summary of all the production-readiness standards that are scattered throughout the book, along with their corresponding requirements. pass:[<a data-type="xref" data-xrefstyle="chap-num-title" href="#evaluate_your_microservice">#evaluate_your_microservice</a>], is a collection of all the "Evaluate Your Microservice" questions found in the corresponding sections at the end of Chapters pass:[<a data-type="xref" data-xrefstyle="select:labelnumber" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>-<a data-type="xref" data-xrefstyle="select:labelnumber" href="#documentation.asciidoc">#documentation.asciidoc</a>]. 
+
+=== Conventions Used in This Book
+
+The following typographical conventions are used in this book:
+
+_Italic_:: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+
++Constant width+:: Used for program listings, as well as within paragraphs to refer to program elements such as variable or function names, databases, data types, environment variables, statements, and keywords.
+
+**`Constant width bold`**:: Shows commands or other text that should be typed literally by the user.
+
+_++Constant width italic++_:: Shows text that should be replaced with user-supplied values or by values determined by context.
+
+
+[TIP]
+====
+This element signifies a tip or suggestion.
+====
+
+[NOTE]
+====
+This element signifies a general note.
+====
+
+[WARNING]
+====
+This element indicates a warning or caution.
+====
+
+=== O'Reilly Safari
+
+[role = "safarienabled"]
+[NOTE]
+====
+pass:[<a href="http://oreilly.com/safari" class="orm:hideurl:ital"><em class="hyperlink">Safari</em></a>] (formerly Safari Books Online) is a membership-based training and reference platform for enterprise, government, educators, and individuals.
+====
+
+Members have access to thousands of books, training videos, Learning Paths, interactive tutorials, and curated playlists from over 250 publishers, including O’Reilly Media, Harvard Business Review, Prentice Hall Professional, Addison-Wesley Professional, Microsoft Press, Sams, Que, Peachpit Press, Adobe, Focal Press, Cisco Press, John Wiley & Sons, Syngress, Morgan Kaufmann, IBM Redbooks, Packt, Adobe Press, FT Press, Apress, Manning, New Riders, McGraw-Hill, Jones & Bartlett, and Course Technology, among others.
+
+For more information, please visit pass:[<a href="http://oreilly.com/safari" class="orm:hideurl:ital"><em>http://oreilly.com/safari</em></a>]. 
+
+=== How to Contact Us
+
+Please address comments and questions concerning this book to the publisher:
+
+++++
+<ul class="simplelist">
+  <li>O’Reilly Media, Inc.</li>
+  <li>1005 Gravenstein Highway North</li>
+  <li>Sebastopol, CA 95472</li>
+  <li>800-998-9938 (in the United States or Canada)</li>
+  <li>707-829-0515 (international or local)</li>
+  <li>707-829-0104 (fax)</li>
+</ul>
+++++
+
+We have a web page for this book, where we list errata, examples, and any additional information. You can access this page at link:$$http://bit.ly/prod-ready_microservices$$[].
+
+To comment or ask technical questions about this book, send email to pass:[<a class="email" href="mailto:bookquestions@oreilly.com"><em>bookquestions@oreilly.com</em></a>].
+
+For more information about our books, courses, conferences, and news, see our website at link:$$http://www.oreilly.com$$[].
+
+Find us on Facebook: link:$$http://facebook.com/oreilly$$[]
+
+Follow us on Twitter: link:$$http://twitter.com/oreillymedia$$[]
+
+Watch us on YouTube: link:$$http://www.youtube.com/oreillymedia$$[]
+
+=== Acknowledgments
+
+This book is dedicated to my better half, Chad Rigetti, who took time away from building quantum computers to listen to all of my rants about microservices, and who joyfully encouraged me every step of the way. I could not have written this book without all of his love and wholehearted support. 
+
+It is also dedicated to my sisters, Martha and Sara, whose grit, resilience, courage, and joy inspire me in every moment and aspect of my life, and also to Shalon Van Tine, who has been my closest friend and fiercest supporter for so many years.  
+
+I am greatly indebted to all of those who offered feedback on early drafts, to my pass:[<span class="keep-together">coworkers</span>] at Uber, and to engineers who have bravely worked to implement the principles and strategies within this book at their own engineering organizations. I am especially thankful to Roxana del Toro, Patrick Schork, Rick Boone, Tyler Dixon, Jonah Horowitz, Ryan Rix, Katherine Hennes, Ingrid Avendano, Sean Hart, Shella Stephens, David Campbell, Jameson Lee, Jane Arc, Eamon Bisson-Donahue, and Aimee Gonzalez. 
+
+None of this would have been possible without Brian Foster, Nan Barber, the technical reviewers, and the rest of the amazing O'Reilly staff. I could not have written this without you. 
+
+
+

@@ -1,0 +1,350 @@
+<section data-type="glossary" id="glossary.asciidoc">
+<h1>Glossary</h1>
+
+<dl data-type="glossary">
+<dt data-type="glossterm">actionable alert</dt>
+<dd data-type="glossdef">
+<p>An alert that, when triggered, contains a step-by-step process that the <strong>on-call rotation</strong> can follow to triage, mitigate, and resolve the alert.</p>
+</dd>
+<dt data-type="glossterm">alerting</dt>
+<dd data-type="glossdef">
+<p>The practice of notifying an on-call developer (or developers) when one of a service&#8217;s <strong>key metrics</strong> has reached a critical or warning <strong>alert threshold</strong>.</p>
+</dd>
+<dt data-type="glossterm">alert threshold</dt>
+<dd data-type="glossdef">
+<p>Static or dynamic quantities that are set for each <strong>key metric</strong> signifying that the key metric in question is at a normal, warning, or critical level; reaching the threshold should trigger an <strong>actionable alert</strong>.</p>
+</dd>
+<dt data-type="glossterm">application platform layer</dt>
+<dd data-type="glossdef">
+<p>The third layer of a microservice ecosystem, containing self-service internal tools, the development environment, test, package, build, and release tools, the deployment pipeline, microservice-level logging, and microservice-level monitoring.</p>
+</dd>
+<dt data-type="glossterm">application programming interface (API)</dt>
+<dd data-type="glossdef">
+<p>A well-defined client-side interface in each microservice that allows other services to interact with it programmatically by sending requests to static <strong>endpoints</strong>.</p>
+</dd>
+<dt data-type="glossterm">architecture diagram</dt>
+<dd data-type="glossdef">
+<p>A high-level visual representation of the architecture of a microservice.</p>
+</dd>
+<dt data-type="glossterm">architecture review</dt>
+<dd data-type="glossdef">
+<p>An organizational practice and process for evaluating, understanding, and improving the architecture of a microservice.</p>
+</dd>
+<dt data-type="glossterm">bare metal</dt>
+<dd data-type="glossdef">
+<p>The term used to refer to servers owned, run, and maintained by the organization itself, as opposed to hardware rented from so-called cloud providers.</p>
+</dd>
+<dt data-type="glossterm">canary</dt>
+<dd data-type="glossdef">
+<p>The second stage of the <strong>deployment pipeline</strong> containing a small percentage of servers hosting production traffic (2%–5% of production traffic); used to test new builds that have made it through <strong>staging</strong> before being rolled out to all <strong>production</strong> servers.</p>
+</dd>
+<dt data-type="glossterm">candidate for production</dt>
+<dd data-type="glossdef">
+<p>A build that has successfully passed all lint, unit, integration, and end-to-end tests in the <strong>development cycle</strong> and is ready to be introduced into the <strong>deployment pipeline</strong>.</p>
+</dd>
+<dt data-type="glossterm">capacity planning</dt>
+<dd data-type="glossdef">
+<p>The organizational practice of planned and scheduled <strong>resource allocation</strong>.</p>
+</dd>
+<dt data-type="glossterm">cloud providers</dt>
+<dd data-type="glossdef">
+<p>Companies such as Amazon Web Services (AWS), Google Cloud Platform (GCP), and Microsoft Azure that allow hardware resources to be rented and easily accessible over secure networks.</p>
+</dd>
+<dt data-type="glossterm">code testing</dt>
+<dd data-type="glossdef">
+<p>Tests that check syntax, style, individual components of a microservice, how the components work together, and how the microservice performs within its complex dependency chains; comprised of <strong>lint tests</strong>, <strong>unit tests</strong>, <strong>integration tests</strong>, and <strong>end-to-end tests</strong>.</p>
+</dd>
+<dt data-type="glossterm">communication layer</dt>
+<dd data-type="glossdef">
+<p>The second layer of the microservice ecosystem; contains the network, DNS, RPC frameworks, endpoints, messaging, service discovery, service registry, and load balancing.</p>
+</dd>
+<dt data-type="glossterm">concurrency</dt>
+<dd data-type="glossdef">
+<p>Applications and microservices that have concurrency break up each task into small pieces, rather than having just one process that does all of the work; essential property required for scalability.</p>
+</dd>
+<dt data-type="glossterm">continuous integration</dt>
+<dd data-type="glossdef">
+<p>A process that automatically integrates, tests, packages, and builds new changes to code on a scheduled and continuous basis.</p>
+</dd>
+<dt data-type="glossterm">Conway&#8217;s Law</dt>
+<dd data-type="glossdef">
+<p>An informal "law" of software architecture named after Melvin Conway stating that the architectural structure of a company&#8217;s products is determined by the communication patterns of the organization; see also <strong>Inverse Conway&#8217;s Law</strong>.</p>
+</dd>
+<dt data-type="glossterm">dashboard</dt>
+<dd data-type="glossdef">
+<p>A visual, graphical display on an internal website containing graphs and charts of the health, status, behavior, and <strong>key metrics</strong> of an application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">decommissioning</dt>
+<dd data-type="glossdef">
+<p>The process of retiring a microservice and/or its API endpoints so that they will no longer be available for use by upstream (client) services.</p>
+</dd>
+<dt data-type="glossterm">dedicated hardware</dt>
+<dd data-type="glossdef">
+<p>Servers or databases that host or store data for only one application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">defensive caching</dt>
+<dd data-type="glossdef">
+<p>The practice of caching the data from a microservice&#8217;s downstream dependencies to protect that microservice from suffering stability and reliability issues if the downstream dependency is unavailable.</p>
+</dd>
+<dt data-type="glossterm">dependency</dt>
+<dd data-type="glossdef">
+<p>A name for any other microservice that a microservice makes requests to; also refers to libraries that a microservice depends on; also used to refer to external (third-party) services that a microservice depends on.</p>
+</dd>
+<dt data-type="glossterm">deployment</dt>
+<dd data-type="glossdef">
+<p>The process through which a new build is sent to servers and the service is started.</p>
+</dd>
+<dt data-type="glossterm">deployment pipeline</dt>
+<dd data-type="glossdef">
+<p>The process of deploying new builds in three stages (to <strong>staging</strong>, to <strong>canary</strong>, and then to <strong>production</strong>).</p>
+</dd>
+<dt data-type="glossterm">deprecation</dt>
+<dd data-type="glossdef">
+<p>When a microservice and/or its endpoints are no longer being maintained by a development team and no longer recommended for use to upstream (client) <span class="keep-together">services</span>.</p>
+</dd>
+<dt data-type="glossterm">developer velocity</dt>
+<dd data-type="glossdef">
+<p>The speed at which development teams are able to iterate, roll out new features, and deploy.</p>
+</dd>
+<dt data-type="glossterm">development cycle</dt>
+<dd data-type="glossdef">
+<p>A name for the overall process associated with developing an application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">development environment</dt>
+<dd data-type="glossdef">
+<p>A system containing tools, environment variables, and processes used by developers to write code for microservices.</p>
+</dd>
+<dt data-type="glossterm">endpoint</dt>
+<dd data-type="glossdef">
+<p>In this book, this term refers to the static API endpoints (HTTP, Thrift, etc.) of microservices that requests are routed to.</p>
+</dd>
+<dt data-type="glossterm">end-to-end tests</dt>
+<dd data-type="glossdef">
+<p>Tests that check whether changes to an application, service, or system work as expected by testing endpoints, clients, dependencies, and any databases.</p>
+</dd>
+<dt data-type="glossterm">external failures</dt>
+<dd data-type="glossdef">
+<p>Failures within the lower three layers of the microservice ecosystem stack.</p>
+</dd>
+<dt data-type="glossterm">full staging</dt>
+<dd data-type="glossdef">
+<p>When the <strong>staging</strong> phase of the <strong>deployment pipeline</strong> runs as a complete mirror copy of production.</p>
+</dd>
+<dt data-type="glossterm">growth scale</dt>
+<dd data-type="glossdef">
+<p>A name given to the measure of how an application, microservice, or system scales; every application, microservice, and system has two types of growth scales, a <strong>quantitative growth scale</strong> and a <strong>qualitative growth scale</strong>.</p>
+</dd>
+<dt data-type="glossterm">hardware layer</dt>
+<dd data-type="glossdef">
+<p>The first layer of the microservice ecosystem; contains physical servers, operating systems, resource isolation and abstraction, configuration management, host-level monitoring, and host-level logging.</p>
+</dd>
+<dt data-type="glossterm">hardware resources</dt>
+<dd data-type="glossdef">
+<p>See <strong>resources</strong>.</p>
+</dd>
+<dt data-type="glossterm">horizontal scaling</dt>
+<dd data-type="glossdef">
+<p>When an application or system is scaled by adding more servers (or other hardware resources).</p>
+</dd>
+<dt data-type="glossterm">host and infrastructure metrics</dt>
+<dd data-type="glossdef">
+<p><strong>Key metrics</strong> of the lower three layers (<strong>hardware layer</strong>, <strong>communication layer</strong>, and <strong>application platform layer</strong>) of the <strong>microservice ecosystem</strong>.</p>
+</dd>
+<dt data-type="glossterm">host parity</dt>
+<dd data-type="glossdef">
+<p>When two separate environments, systems, or phases of the deployment pipeline (e.g., <strong>staging</strong> versus <strong>production</strong>) have the same number of hosts in each environment, system, datacenter, or deployment phase.</p>
+</dd>
+<dt data-type="glossterm">infrastructure</dt>
+<dd data-type="glossdef">
+<p>A term used in this book to refer to either the combination of the <strong>application platform layer</strong> and the <strong>communication layer</strong> or the three lowest layers of the microservice ecosystem (<strong>hardware layer</strong>, <strong>communication layer</strong>, and <strong>application platform layer</strong>.</p>
+</dd>
+<dt data-type="glossterm">integration tests</dt>
+<dd data-type="glossdef">
+<p>These test how the components of the microservice (which are tested individually using <strong>unit tests</strong>) work together.</p>
+</dd>
+<dt data-type="glossterm">internal failures</dt>
+<dd data-type="glossdef">
+<p>Failures within a microservice.</p>
+</dd>
+<dt data-type="glossterm">Inverse Conway&#8217;s Law</dt>
+<dd data-type="glossdef">
+<p>The inverse of <strong>Conway&#8217;s Law</strong>, which states that the organizational structure of a company is determined by the architecture of its product(s).</p>
+</dd>
+<dt data-type="glossterm">key metrics</dt>
+<dd data-type="glossdef">
+<p>Properties of an application, microservice, or system that are necessary and sufficient for describing the health, status, and behavior of the application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">lint tests</dt>
+<dd data-type="glossdef">
+<p>Tests that check syntax and style errors; part of a <strong>code-testing</strong> suite.</p>
+</dd>
+<dt data-type="glossterm">load balancing</dt>
+<dd data-type="glossdef">
+<p>A device or service that distributes traffic across multiple servers or microservices.</p>
+</dd>
+<dt data-type="glossterm">logging</dt>
+<dd data-type="glossdef">
+<p>The practice of recording the events of an application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">microservice</dt>
+<dd data-type="glossdef">
+<p>A small, replaceable, modular, independently developed and independently deployed software application that is responsible for performing one function within a larger system.</p>
+</dd>
+<dt data-type="glossterm">microservice ecosystem</dt>
+<dd data-type="glossdef">
+<p>A term for the overall system containing the microservices and infrastructure, which can be divided into four layers containing the microservices, the application platform, the communication layer, and the hardware layer.</p>
+</dd>
+<dt data-type="glossterm">microservice layer</dt>
+<dd data-type="glossdef">
+<p>The fourth layer of the microservice ecosystem; contains the microservices and all microservice-specific configurations.</p>
+</dd>
+<dt data-type="glossterm">microservice metrics</dt>
+<dd data-type="glossdef">
+<p>The <strong>key metrics</strong> unique to each <strong>microservice</strong> in the <strong>microservice layer</strong> of the <strong>microservice ecosystem</strong>.</p>
+</dd>
+<dt data-type="glossterm">monitoring</dt>
+<dd data-type="glossdef">
+<p>The practice of watching and tracking the status, health, and behavior of an application or microservice&#8217;s <strong>key metrics</strong> over a long period of time.</p>
+</dd>
+<dt data-type="glossterm">monolith</dt>
+<dd data-type="glossdef">
+<p>Large, complex software systems that are maintained, run, and deployed as one single application containing all application-related code and features.</p>
+</dd>
+<dt data-type="glossterm">on-call rotation</dt>
+<dd data-type="glossdef">
+<p>A group of developers or operations engineers that are responsible for responding to, mitigating, and resolving an application, microservice, or system&#8217;s alerts, incidents, and failures.</p>
+</dd>
+<dt data-type="glossterm">on-call runbook</dt>
+<dd data-type="glossdef">
+<p>A section of microservice documentation that contains general incident and outage response procedures, step-by-step instructions on how to triage, mitigate, and resolve each alert, and general tips on how to debug and troubleshoot the microservice; used by the developers or operational engineers who are on call for the service.</p>
+</dd>
+<dt data-type="glossterm">operational engineers</dt>
+<dd data-type="glossdef">
+<p>Engineers whose primary responsibilities are for the operational tasks associated with running a software application, including system administrators, TechOps, DevOps, and site reliability engineers.</p>
+</dd>
+<dt data-type="glossterm">outage</dt>
+<dd data-type="glossdef">
+<p>A period of time during which an application, microservice, or other system is inaccessible (experiencing downtime).</p>
+</dd>
+<dt data-type="glossterm">partial staging</dt>
+<dd data-type="glossdef">
+<p>When the <strong>staging</strong> phase of the <strong>deployment pipeline</strong> is not a complete mirror copy of production, but where microservices in the <strong>staging</strong> environment talk to the <strong>production</strong> versions of clients, dependencies, and databases.</p>
+</dd>
+<dt data-type="glossterm">partitioning</dt>
+<dd data-type="glossdef">
+<p>The process and architectural practice of breaking each task up into smaller pieces that can be processed in parallel; essential property of scalability.</p>
+</dd>
+<dt data-type="glossterm">production</dt>
+<dd data-type="glossdef">
+<p>The final stage of the <strong>deployment pipeline</strong> where all real-world traffic is hosted; also used to refer to real-world traffic and the environment hosting that traffic.</p>
+</dd>
+<dt data-type="glossterm">production-readiness audit</dt>
+<dd data-type="glossdef">
+<p>The process of evaluating a microservice&#8217;s production-readiness using a <strong>production-readiness checklist</strong>.</p>
+</dd>
+<dt data-type="glossterm">production-readiness automation</dt>
+<dd data-type="glossdef">
+<p>A method for ensuring that microservices meet the production-readiness standards by automatically and programmatically checking whether each microservice adheres to the requirements associated with each production-readiness standard.</p>
+</dd>
+<dt data-type="glossterm">production-readiness checklist</dt>
+<dd data-type="glossdef">
+<p>A list of production-readiness standards, along with specific requirements that can be implemented to achieve each production-readiness standard.</p>
+</dd>
+<dt data-type="glossterm">production-readiness roadmap</dt>
+<dd data-type="glossdef">
+<p>A document used as part of the production-readiness process that details the steps that need to be taken to bring a microservice to a production-ready state.</p>
+</dd>
+<dt data-type="glossterm">production-readiness score</dt>
+<dd data-type="glossdef">
+<p>A score assigned to microservices that is calculated based on how well the microservice in question meets the requirements associated with each production-readiness standard.</p>
+</dd>
+<dt data-type="glossterm">publish–subscribe messaging</dt>
+<dd data-type="glossdef">
+<p>An asynchronous messaging paradigm in which clients subscribe to a topic, and will receive a message whenever a publisher publishes a message to that topic.</p>
+</dd>
+<dt data-type="glossterm">qualitative growth scale</dt>
+<dd data-type="glossdef">
+<p>A high-level, qualitative measure of how an application, microservice, or system scales that is tied to high-level business metrics; one type of <strong>growth scale</strong>.</p>
+</dd>
+<dt data-type="glossterm">quantitative growth scale</dt>
+<dd data-type="glossdef">
+<p>A quantitative measure of how an application, microservice, or system scales; obtained by translating the <strong>qualitative growth scale</strong> into a measurable quantity; one type of <strong>growth scale</strong>; usually expressed in terms of requests per second, queries per second, or transactions per second that the application, microservice, or system can process.</p>
+</dd>
+<dt data-type="glossterm">remote procedure call (RPC)</dt>
+<dd data-type="glossdef">
+<p>A call made over the network to a remote server that is designed to look and behave exactly like a local procedure call; used extensively in microservice architecture and in all large-scale distributed systems.</p>
+</dd>
+<dt data-type="glossterm">repository</dt>
+<dd data-type="glossdef">
+<p>A centralized archive where all the source code for an application or service is stored.</p>
+</dd>
+<dt data-type="glossterm">request flow</dt>
+<dd data-type="glossdef">
+<p>A name for the pattern of steps that are taken when a request is made from one microservice to another.</p>
+</dd>
+<dt data-type="glossterm">request–response messaging</dt>
+<dd data-type="glossdef">
+<p>A messaging paradigm in which a client will send a request to a <strong>microservice</strong> (or message broker) which will respond with the information requested.</p>
+</dd>
+<dt data-type="glossterm">resource allocation</dt>
+<dd data-type="glossdef">
+<p>Dividing available <strong>hardware resources</strong> across microservice ecosystems.</p>
+</dd>
+<dt data-type="glossterm">resource bottlenecks</dt>
+<dd data-type="glossdef">
+<p>Scalability limitations caused by the way an application, microservice, or system uses its <strong>resources</strong>.</p>
+</dd>
+<dt data-type="glossterm">resource requirements</dt>
+<dd data-type="glossdef">
+<p>The <strong>resources</strong> required by an application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">resources</dt>
+<dd data-type="glossdef">
+<p>An abstraction of various performance properties of hardware (servers), like CPU, memory, network, etc.</p>
+</dd>
+<dt data-type="glossterm">self-service internal tools</dt>
+<dd data-type="glossdef">
+<p>Standardized tools in the <strong>application platform layer</strong> of a <strong>microservice ecosystem</strong> that are built to help developers work with the lower layers of the microservice ecosystem to develop, deploy, and run their microservices.</p>
+</dd>
+<dt data-type="glossterm">service discovery</dt>
+<dd data-type="glossdef">
+<p>A system that discovers where all instances of a microservice are hosted, ensuring that traffic is routed to the appropriate servers hosting the application.</p>
+</dd>
+<dt data-type="glossterm">service registry</dt>
+<dd data-type="glossdef">
+<p>A database that tracks all ports and IPs all of microservices and systems within a <strong>microservice ecosystem</strong>.</p>
+</dd>
+<dt data-type="glossterm">shared hardware</dt>
+<dd data-type="glossdef">
+<p>Servers or databases that are used to host or store data for more than one application, microservice, or system simultaneously.</p>
+</dd>
+<dt data-type="glossterm">single point of failure (SPOF)</dt>
+<dd data-type="glossdef">
+<p>A piece of an application, microservice, or system that, if it fails, will bring down the application, microservice, or system.</p>
+</dd>
+<dt data-type="glossterm">site reliability engineering (SRE)</dt>
+<dd data-type="glossdef">
+<p>Operational engineers responsible in large companies for the reliability of the applications, microservices, or systems within the engineering organization(s).</p>
+</dd>
+<dt data-type="glossterm">splitting the monolith</dt>
+<dd data-type="glossdef">
+<p>The name given to the process of breaking a large monolithic application into a set of microservices.</p>
+</dd>
+<dt data-type="glossterm">staging</dt>
+<dd data-type="glossdef">
+<p>The first phase of a <strong>deployment pipeline</strong> that does not serve production traffic and is used to test new builds; usually a mirror copy of <strong>production</strong>; may be implemented as either <strong>full staging</strong> or <strong>partial staging</strong>.</p>
+</dd>
+<dt data-type="glossterm">three-tier architecture</dt>
+<dd data-type="glossdef">
+<p>A basic architecture for software applications consisting of a frontend (client-side) piece, a backend piece, and some type of datastore.</p>
+</dd>
+<dt data-type="glossterm">unit tests</dt>
+<dd data-type="glossdef">
+<p>Small, independent tests that run over small pieces (or units) or a microservice&#8217;s code; part of <strong>code testing</strong>.</p>
+</dd>
+<dt data-type="glossterm">vertical scaling</dt>
+<dd data-type="glossdef">
+<p>When an application or system is scaled by increasing the resources (CPU, RAM) of each host that the application or system is running on.</p>
+</dd>
+</dl>
+</section>

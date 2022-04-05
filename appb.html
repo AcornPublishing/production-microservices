@@ -1,0 +1,899 @@
+<section data-type="appendix" id="evaluate_your_microservice">
+<h1>Evaluate Your Microservice</h1>
+
+
+<p>To help the reader evaluate the production-readiness of their microservice(s) and microservice ecosystem, Chapters  <a data-type="xref" href="#stability_reliability.asciidoc" data-xrefstyle="select:labelnumber">#stability_reliability.asciidoc</a>–<a data-type="xref" href="#documentation.asciidoc" data-xrefstyle="select:labelnumber">#documentation.asciidoc</a> conclude with a short list of questions associated with the production-readiness standard discussed. The questions are organized by topic, and correspond to the sections within each chapter. All of the questions from each chapter have been collected here for easy reference. <a data-type="indexterm" id="ecappb" data-primary="evaluation checklists"/><a data-type="indexterm" id="cappbfe" data-primary="checklists" data-secondary="for evaluation"/></p>
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Stability and Reliability</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>The Development Cycle</h2>
+
+<ul>
+<li>
+<p>Does the microservice have a central repository where all code is stored?<a data-type="indexterm" data-primary="development cycle"/><a data-type="indexterm" id="sarappb" data-primary="stability and reliability"/></p>
+</li>
+<li>
+<p>Do developers work in a development environment that accurately reflects the state of production (e.g., that accurately reflects the real world)?</p>
+</li>
+<li>
+<p>Are there appropriate lint, unit, integration, and end-to-end tests in place for the microservice?</p>
+</li>
+<li>
+<p>Are there code review procedures and policies in place?</p>
+</li>
+<li>
+<p>Is the test, packaging, build, and release process automated?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>The Deployment Pipeline</h2>
+
+<ul>
+<li>
+<p>Does the microservice ecosystem have a standardized deployment pipeline?<a data-type="indexterm" data-primary="deployment pipeline"/></p>
+</li>
+<li>
+<p>Is there a staging phase in the deployment pipeline that is either full or partial staging?</p>
+</li>
+<li>
+<p>What access does the staging environment have to production services?</p>
+</li>
+<li>
+<p>Is there a canary phase in the deployment pipeline?</p>
+</li>
+<li>
+<p>Do deployments run in the canary phase for a period of time that is long enough to catch any failures?</p>
+</li>
+<li>
+<p>Does the canary phase accurately host a random sample of production traffic?</p>
+</li>
+<li>
+<p>Are the microservice&#8217;s ports the same for canary and production?</p>
+</li>
+<li>
+<p>Are deployments to production done all at the same time, or incrementally rolled out?</p>
+</li>
+<li>
+<p>Is there a procedure in place for skipping the staging and canary phases in case of an emergency?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Dependencies</h2>
+
+<ul>
+<li>
+<p>What are this microservice&#8217;s dependencies?<a data-type="indexterm" data-primary="dependencies"/></p>
+</li>
+<li>
+<p>What are its clients?</p>
+</li>
+<li>
+<p>How does this microservice mitigate dependency failures?</p>
+</li>
+<li>
+<p>Are there backups, alternatives, fallbacks, or defensive caching for each <span class="keep-together">dependency</span>?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Routing and Discovery</h2>
+
+<ul>
+<li>
+<p>Are health checks to the microservice reliable? <a data-type="indexterm" data-primary="routing and discovery"/></p>
+</li>
+<li>
+<p>Do health checks accurately reflect the health of the microservice?</p>
+</li>
+<li>
+<p>Are health checks run on a separate channel within the communication layer?</p>
+</li>
+<li>
+<p>Are there circuit breakers in place to prevent unhealthy microservices from making requests?</p>
+</li>
+<li>
+<p>Are there circuit breakers in place to prevent production traffic from being sent to unhealthy hosts and microservices?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Deprecation and Decommissioning</h2>
+
+<ul>
+<li>
+<p>Are there procedures in place for decommissioning a microservice?<a data-type="indexterm" data-primary="deprecation and decommissioning"/><a data-type="indexterm" data-primary="decommissioning"/></p>
+</li>
+<li>
+<p>Are there procedures in place for deprecating a microservice&#8217;s API endpoints? <a data-type="indexterm" data-primary="stability and reliability" data-startref="sarappb"/></p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Scalability and Performance</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Knowing the Growth Scale</h2>
+
+<ul>
+<li>
+<p>What is this microservice&#8217;s qualitative growth scale?<a data-type="indexterm" id="sapappb" data-primary="scalability and performance"/><a data-type="indexterm" data-primary="growth scale"/></p>
+</li>
+<li>
+<p>What is this microservice&#8217;s quantitative growth scale?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Efficient Use of Resources</h2>
+
+<ul>
+<li>
+<p>Is the microservice running on dedicated or shared hardware?<a data-type="indexterm" data-primary="resource utilization"/></p>
+</li>
+<li>
+<p>Are any resource abstraction and allocation technologies being used?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Resource Awareness</h2>
+
+<ul>
+<li>
+<p>What are the microservice&#8217;s resource requirements (CPU, RAM, etc.)? <a data-type="indexterm" data-primary="resource awareness"/></p>
+</li>
+<li>
+<p>How much traffic can one instance of the microservice handle?</p>
+</li>
+<li>
+<p>How much CPU does one instance of the microservice require?</p>
+</li>
+<li>
+<p>How much memory does one instance of the microservice require?</p>
+</li>
+<li>
+<p>Are there any other resource requirements that are specific to this microservice?</p>
+</li>
+<li>
+<p>What are the resource bottlenecks of this microservice?</p>
+</li>
+<li>
+<p>Does this microservice need to be scaled vertically, horizontally, or both?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Capacity Planning</h2>
+
+<ul>
+<li>
+<p>Is capacity planning performed on a scheduled basis?<a data-type="indexterm" data-primary="capacity planning"/></p>
+</li>
+<li>
+<p>What is the lead time for new hardware?</p>
+</li>
+<li>
+<p>How often are hardware requests made?</p>
+</li>
+<li>
+<p>Are any microservices given priority when hardware requests are made?</p>
+</li>
+<li>
+<p>Is capacity planning automated or is it manual?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Dependency Scaling</h2>
+
+<ul>
+<li>
+<p>What are this microservice&#8217;s dependencies?<a data-type="indexterm" data-primary="dependencies" data-secondary="scaling"/></p>
+</li>
+<li>
+<p>Are the dependencies scalable and performant?</p>
+</li>
+<li>
+<p>Will the dependencies scale with this microservice&#8217;s expected growth?</p>
+</li>
+<li>
+<p>Are dependency owners prepared for this microservice&#8217;s expected growth?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Traffic Management</h2>
+
+<ul>
+<li>
+<p>Are the microservice&#8217;s traffic patterns well understood?<a data-type="indexterm" data-primary="traffic management"/></p>
+</li>
+<li>
+<p>Are changes to the service scheduled around traffic patterns?</p>
+</li>
+<li>
+<p>Are drastic changes in traffic patterns (especially bursts of traffic) handled carefully and appropriately?</p>
+</li>
+<li>
+<p>Can traffic be automatically routed to other datacenters in case of failure?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Task Handling and Processing</h2>
+
+<ul>
+<li>
+<p>Is the microservice written in a programming language that will allow the service to be scalable and performant? <a data-type="indexterm" data-primary="task handling and processing"/></p>
+</li>
+<li>
+<p>Are there any scalability or performance limitations in the way the microservice handles requests?</p>
+</li>
+<li>
+<p>Are there any scalability or performance limitations in the way the microservice processes tasks?</p>
+</li>
+<li>
+<p>Do developers on the microservice team understand how their service processes tasks, how efficiently it processes those tasks, and how the service will perform as the number of tasks and requests increases?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Scalable Data Storage</h2>
+
+<ul>
+<li>
+<p>Does this microservice handle data in a scalable and performant way? <a data-type="indexterm" data-primary="data storage" data-secondary="scalability of"/></p>
+</li>
+<li>
+<p>What type of data does this microservice need to store?</p>
+</li>
+<li>
+<p>What is the schema needed for its data?</p>
+</li>
+<li>
+<p>How many transactions are needed and/or made per second?</p>
+</li>
+<li>
+<p>Does this microservice need higher read or write performance?</p>
+</li>
+<li>
+<p>Is it read-heavy, write-heavy, or both?</p>
+</li>
+<li>
+<p>Is this service&#8217;s database scaled horizontally or vertically? Is it replicated or <span class="keep-together">partitioned</span>?</p>
+</li>
+<li>
+<p>Is this microservice using a dedicated or shared database?</p>
+</li>
+<li>
+<p>How does the service handle and/or store test data?
+<a data-type="indexterm" data-primary="scalability and performance" data-startref="sapappb"/></p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Fault Tolerance and Catastrophe-Preparedness</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Avoiding Single Points of Failure</h2>
+
+<ul>
+<li>
+<p>Does the microservice have a single point of failure?<a data-type="indexterm" data-primary="fault tolerance"/><a data-type="indexterm" data-primary="single points of failure"/></p>
+</li>
+<li>
+<p>Does it have more than one point of failure?</p>
+</li>
+<li>
+<p>Can any points of failure be architected away, or do they need to be mitigated?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Catastrophes and Failure Scenarios</h2>
+
+<ul>
+<li>
+<p>Have all of the microservice&#8217;s failure scenarios and possible catastrophes been identified? <a data-type="indexterm" data-primary="fault tolerance" data-secondary="identifying failure scenarios"/></p>
+</li>
+<li>
+<p>What are common failures across the microservice ecosystem?</p>
+</li>
+<li>
+<p>What are the hardware-layer failure scenarios that can affect this microservice?</p>
+</li>
+<li>
+<p>What communication-layer and application-layer failures can affect this <span class="keep-together">microservice</span>?</p>
+</li>
+<li>
+<p>What sorts of dependency failures can affect this microservice?</p>
+</li>
+<li>
+<p>What are the internal failures that could bring down this microservice?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Resiliency Testing</h2>
+
+<ul>
+<li>
+<p>Does this microservice have appropriate lint, unit, integration, and end-to-end tests?<a data-type="indexterm" data-primary="resiliency testing"/></p>
+</li>
+<li>
+<p>Does this microservice undergo regular, scheduled load testing?</p>
+</li>
+<li>
+<p>Are all possible failure scenarios implemented and tested using chaos testing?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Failure Detection and Remediation</h2>
+
+<ul>
+<li>
+<p>Are there standardized processes across the engineering organization(s) for handling incidents and outages?<a data-type="indexterm" data-primary="fault tolerance" data-secondary="failure detection and mitigation"/></p>
+</li>
+<li>
+<p>How do failures and outages of this microservice impact the business?</p>
+</li>
+<li>
+<p>Are there clearly defined levels of failure?</p>
+</li>
+<li>
+<p>Are there clearly defined mitigation strategies?</p>
+</li>
+<li>
+<p>Does the team follow the five stages of incident response when incidents and outages occur?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Monitoring</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Key Metrics</h2>
+
+<ul>
+<li>
+<p>What are this microservice&#8217;s key metrics? <a data-type="indexterm" id="mappb" data-primary="monitoring"/><a data-type="indexterm" data-primary="key metrics"/></p>
+</li>
+<li>
+<p>What are the host and infrastructure metrics?</p>
+</li>
+<li>
+<p>What are the microservice-level metrics?</p>
+</li>
+<li>
+<p>Are all the microservice&#8217;s key metrics monitored?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Logging</h2>
+
+<ul>
+<li>
+<p>What information does this microservice need to log?<a data-type="indexterm" data-primary="logging"/></p>
+</li>
+<li>
+<p>Does this microservice log all important requests?</p>
+</li>
+<li>
+<p>Does the logging accurately reflect the state of the microservice at any given time?</p>
+</li>
+<li>
+<p>Is this logging solution cost-effective and scalable?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Dashboards</h2>
+
+<ul>
+<li>
+<p>Does this microservice have a dashboard?<a data-type="indexterm" data-primary="dashboards"/></p>
+</li>
+<li>
+<p>Is the dashboard easy to interpret?
+Are all key metrics displayed on the dashboard?</p>
+</li>
+<li>
+<p>Can I determine whether or not this microservice is working correctly by looking at the dashboard?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Alerting</h2>
+
+<ul>
+<li>
+<p>Is there an alert for every key metric?<a data-type="indexterm" data-primary="alerts"/></p>
+</li>
+<li>
+<p>Are all alerts defined by good, signal-providing thresholds?</p>
+</li>
+<li>
+<p>Are alert thresholds set appropriately so that alerts will fire before an outage occurs?</p>
+</li>
+<li>
+<p>Are all alerts actionable?</p>
+</li>
+<li>
+<p>Are there step-by-step triage, mitigation, and resolution instructions for each alert in the on-call runbook?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>On-Call Rotations</h2>
+
+<ul>
+<li>
+<p>Is there a dedicated on-call rotation responsible for monitoring this microservice?<a data-type="indexterm" data-primary="on-call rotations"/></p>
+</li>
+<li>
+<p>Is there a minimum of two developers on each on-call shift?</p>
+</li>
+<li>
+<p>Are there standardized on-call procedures across the engineering organization?
+<a data-type="indexterm" data-primary="monitoring" data-startref="mappb"/></p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Documentation and Understanding</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Microservice Documentation</h2>
+
+<ul>
+<li>
+<p>Is the documentation for all microservices stored in a centralized, shared, and easily accessible place?<a data-type="indexterm" data-primary="documentation"/></p>
+</li>
+<li>
+<p>Is the documentation easily searchable?</p>
+</li>
+<li>
+<p>Are significant changes to the microservice accompanied by updates to the microservice&#8217;s documentation?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain a description of the <span class="keep-together">microservice</span>?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain an architecture diagram?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain contact and on-call information?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain links to important information?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain an onboarding and development guide?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain information about the microservice&#8217;s request flow, endpoints, and dependencies?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain an on-call runbook?</p>
+</li>
+<li>
+<p>Does the microservice&#8217;s documentation contain an FAQ section?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Microservice Understanding</h2>
+
+<ul>
+<li>
+<p>Can every developer on the team answer questions about the production-readiness of the microservice?<a data-type="indexterm" data-primary="understanding of microservices"/></p>
+</li>
+<li>
+<p>Is there a set of principles and standards that all microservices are held to?</p>
+</li>
+<li>
+<p>Is there an RFC process in place for every new microservice?</p>
+</li>
+<li>
+<p>Are existing microservices reviewed and audited frequently?</p>
+</li>
+<li>
+<p>Are architecture reviews held for every microservice team?</p>
+</li>
+<li>
+<p>Is there a production-readiness audit process in place?</p>
+</li>
+<li>
+<p>Are production-readiness roadmaps used to bring the microservice to a production-ready state?</p>
+</li>
+<li>
+<p>Do the production-readiness standards drive the organization&#8217;s OKRs?</p>
+</li>
+<li>
+<p>Is the production-readiness process automated?<a data-type="indexterm" data-primary="evaluation checklists" data-startref="ecappb"/><a data-type="indexterm" data-primary="checklists" data-secondary="for evaluation" data-startref="cappbfe"/></p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+</section>

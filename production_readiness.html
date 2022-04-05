@@ -1,0 +1,504 @@
+<section data-type="chapter" id="production_readiness.asciidoc">
+<h1>Production-Readiness</h1>
+
+
+<p>While <a data-type="indexterm" data-primary="production-readiness" data-secondary="standardization for" data-see="standardization"/>the adoption of microservice architecture brings considerable freedom to developers, ensuring availability across the microservice ecosystem requires holding individual microservices to high architectural, operational, and organizational standards. This chapter covers the challenges of microservice standardization, introduces availability as the goal of standardization, presents the eight production-readiness standards, and proposes strategies for implementing production-readiness standardization across an engineering organization.</p>
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>The Challenges of Microservice Standardization</h1>
+
+<p>The <a data-type="indexterm" id="s2co" data-primary="standardization" data-secondary="challenges of"/>architecture of a monolithic application is usually determined at the beginning of the application&#8217;s lifecycle. For many applications, the architecture is determined at the time a company begins. As the business grows, and the application scales, developers who are adding new features often find themselves constrained and limited by the choices made when the application was first designed. They are constrained by choice of language, by the libraries they are able to use, by the development tools they can work with, and by the need for extensive regression testing to ensure that every new feature they add does not disturb or compromise the entirety of the application. Any refactoring that happens to the standalone, monolithic application is still essentially constrained by initial architectural decisions: initial conditions exclusively determine the future of the application.</p>
+
+<p>The adoption of microservice architecture brings a considerable amount of freedom to developers. They are no longer tied to the architectural decisions of the past, they can architect their service however they wish, and they have free reign in decisions of language, of database, of development tools, and the like. The message accompanying the adoption of microservice architecture is usually understood and heard by developers as follows: build an application that does one thing—one thing only—and does that one thing <em>extraordinarily well</em>; do whatever you need to do, build it however you want—just make sure it gets the job done.</p>
+
+<p>While this romantic idealization of microservice development is true in principle, not all microservices are created equal—nor should they be. Each microservice is part of a microservice ecosystem, and complex dependency chains are a necessary inevitability. When you have 100, 1,000, or even 10,000 microservices, each of them will be playing a small role in a very large system. The services must interact seamlessly with one another, and—most importantly—no service or set of services should compromise the integrity of the overall system or product that they comprise. If the overall system or product is to be any good, it must be held to certain standards, and consequently, each of its parts must abide by these standards as well.</p>
+
+<p>It&#8217;s relatively simple to determine standards and give requirements to a microservice team if we focus on the needs of that specific team and the role their service is to play. We can say, "your microservice must do <em>x</em>, <em>y</em>, and <em>z</em>, and to do <em>x</em>, <em>y</em>, and <em>z</em> well, you need to make sure you meet this set <em>S</em> of requirements," giving each team a set of requirements that is relevant to their service, and to their service alone. Unfortunately, this approach simply isn&#8217;t scalable and neglects to recognize the important fact that a microservice is but a very small piece of an absurdly large and distributed puzzle. We must define standards and requirements for our microservices, and they must be general enough to apply to every single microservice yet specific enough to be quantifiable and produce measurable results. <a data-type="indexterm" data-primary="standardization" data-secondary="challenges of" data-startref="s2co"/>This is where the concept of <em>production-readiness</em> comes in.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Availability: The Goal of Standardization</h1>
+
+<p>Within <a data-type="indexterm" id="s2am" data-primary="standardization" data-secondary="availability measurement"/><a data-type="indexterm" id="ac2" data-primary="availability"/>microservice ecosystems, <a data-type="indexterm" data-primary="service-level agreements (SLAs)"/>service-level agreements (SLAs) regarding the availability of a service are the most commonly used methods of measuring a service&#8217;s success: if a service is highly available (that is, has very little downtime), then we can say with reasonable confidence (and a few caveats) that the service is doing its job.</p>
+
+<p>Calculating and measuring availability is easy. You need to calculate only three measurable quantities: <em>uptime</em> <a data-type="indexterm" data-primary="uptime"/>(the length of time that the microservice worked correctly), <em>downtime</em> (the length of time that the microservice was <em>not</em> working correctly), and the total time a service was operational (the sum of uptime and downtime). Availability is then the uptime divided by the total time a service was operational (uptime + downtime).</p>
+
+<p>As useful as it is, availability is not in itself a principle of microservice standardization, but the goal. It can&#8217;t be a principle of standardization because it gives no guidance as to how to architect, build, or run the microservice: telling developers to make their microservice more available without telling them how (or <em>why</em>) to do so is useless. Availability alone comes with no concrete, applicable steps, but as we will see in the following sections, there are concrete, applicable steps that can be taken toward reaching the goal of building an available microservice.</p>
+<aside data-type="sidebar">
+<h5>Calculating Availability</h5>
+<p>Availability is measured in so-called nines notation, which corresponds to the percentage of time that a service is available. For example, a service that is available 99% of the time is said to have "two-nines availability."</p>
+
+<p>This notation is useful because it gives us a specific amount of downtime that a service is allowed to have. If your service is required to have four-nines availability, then it is allowed 52.56 minutes of downtime per year, which is 4.38 minutes of downtime per month, 1.01 minutes of downtime per week, and 8.66 seconds of downtime per day.</p>
+
+<p>Here are the availability and downtime calculations for 99% availability to 99.999% availability:</p>
+
+<p><strong>99% availability: (two-nines)</strong></p>
+
+<ul>
+<li>
+<p>3.65 days/year (of allowed downtime)</p>
+</li>
+<li>
+<p>7.20 hours/month</p>
+</li>
+<li>
+<p>1.68 hours/week</p>
+</li>
+<li>
+<p>14.4 minutes/day</p>
+</li>
+</ul>
+
+<p><strong>99.9% availability (three-nines):</strong></p>
+
+<ul>
+<li>
+<p>8.76 hours/year</p>
+</li>
+<li>
+<p>43.8 minutes/month</p>
+</li>
+<li>
+<p>10.1 minutes/week</p>
+</li>
+<li>
+<p>1.44 minutes/day</p>
+</li>
+</ul>
+
+<p><strong>99.99% availability (four-nines):</strong></p>
+
+<ul>
+<li>
+<p>52.56 minutes/year</p>
+</li>
+<li>
+<p>4.38 minutes/month</p>
+</li>
+<li>
+<p>1.01 minutes/week</p>
+</li>
+<li>
+<p>8.66 seconds/day</p>
+</li>
+</ul>
+
+<p class="pagebreak-before"><strong>99.999% availability (five-nines):</strong></p>
+
+<ul>
+<li>
+<p>5.26 minutes/year</p>
+</li>
+<li>
+<p>25.9 seconds/month</p>
+</li>
+<li>
+<p>6.05 seconds/week</p>
+</li>
+<li>
+<p>864.3 milliseconds/day</p>
+</li>
+</ul>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Production-Readiness Standards</h1>
+
+<p>The basic <a data-type="indexterm" data-primary="standardization" data-secondary="availability measurement" data-startref="s2am"/><a data-type="indexterm" data-primary="availability" data-startref="ac2"/><a data-type="indexterm" id="prs2" data-primary="standardization"/>idea behind production-readiness is this: a production-ready application or service is one that can be trusted to serve production traffic. When we refer to an application or microservice as "production-ready," we confer a great deal of trust upon it: we trust it to behave reasonably, we trust it to perform reliably, we trust it to get the job done and to do its job well with very little downtime. Production-readiness is the key to microservice standardization, the key to achieving availability across the microservice ecosystem.</p>
+
+<p>However, the idea of production-readiness as stated isn&#8217;t useful enough on its own to serve as the exhaustive definition we need, and without further explication, the concept isn&#8217;t very helpful. We need to know exactly what requirements every service must meet in order to be deemed production-ready and to be trusted to serve production traffic in a reliable, appropriate way—a trust that can&#8217;t be given freely, but has to be earned. The requirements must themselves be principles that are true for every microservice, for every application, and for every distributed system: standardization without principle is meaningless.</p>
+
+<p>It turns out that there is a set of eight principles that, when adopted together, fits these criteria. Each of these principles is quantifiable, gives rise to a set of actionable requirements, and produces measurable results. They are: <em>stability</em>, <em>reliability</em>, <em>scalability</em>, <em>fault tolerance</em>, <em>catastrophe-preparedness</em>, <em>performance</em>, <em>monitoring</em>, and <em>documentation</em>. The driving force behind each of these principles is that, together, they contribute to and drive the <em>availability</em> of a microservice.</p>
+
+<p>Availability is, in some ways, an emergent property of a production-ready microservice. It emerges from building a scalable, reliable, fault-tolerant, performant, monitored, documented, and catastrophe-prepared microservice. Any one of these principles individually is not enough to ensure availability, but together they are: building a microservice with these principles as the driving architectural and operational requirements guarantees a highly available system that can be trusted with production traffic.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Stability</h2>
+
+<p>With <a data-type="indexterm" id="prs2s" data-primary="standardization" data-secondary="stability"/><a data-type="indexterm" id="s2" data-primary="stability and reliability" data-secondary="stability standards"/>the introduction of microservice architecture, developers are given freedom to develop and deploy at a very high velocity. New features can be added and deployed each day, bugs can be quickly fixed, any old technologies swapped out for the newest ones, and outdated microservices can be rewritten and the old versions deprecated and decommissioned. With this increased velocity comes increased instability, and in microservice ecosystems the majority of outages can usually be traced back to a bad deployment that contained buggy code or other serious errors. To ensure availability, we need to carefully guard against this instability that stems from increased developer velocity and the constant evolution of the microservice ecosystem.</p>
+
+<p>Stability allows us to reach availability by giving us ways to responsibly handle changes to microservices. A stable microservice is one in which development, deployment, the addition of new technologies, and the decommissioning and deprecation of microservices do not give rise to instability within and across the larger microservice ecosystem. We can determine stability requirements for each microservice to mitigate the negative side effects that may accompany each change.</p>
+
+<p>To mitigate any problems that may arise from the development cycle, stable development procedures can be put into place. To counteract any instability introduced by deployment, we can ensure our microservices are deployed carefully with proper staging, canary (a small pool of 2%–5% of production hosts), and production rollouts. To prevent the introduction of new technologies and the deprecation and decommissioning of old microservices from compromising the availability of other services, we can enforce stable introduction and deprecation procedures.</p>
+<aside data-type="sidebar">
+<h5>Stability Requirements</h5>
+<p>The requirements of building a stable microservice are:</p>
+
+<ul>
+<li>
+<p>A stable development cycle</p>
+</li>
+<li>
+<p>A stable deployment process</p>
+</li>
+<li>
+<p>Stable introduction and deprecation procedures</p>
+</li>
+</ul>
+
+<p>The details of stability requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>.</em></p>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Reliability</h2>
+
+<p>Stability <a data-type="indexterm" data-primary="standardization" data-secondary="stability" data-startref="prs2s"/><a data-type="indexterm" data-primary="stability and reliability" data-secondary="stability standards" data-startref="s2"/><a data-type="indexterm" id="prs2r" data-primary="standardization" data-secondary="reliability"/><a data-type="indexterm" id="r2" data-primary="reliability"/>alone isn&#8217;t enough to ensure a microservice&#8217;s availability: the service must also be <em>reliable</em>. A reliable microservice is one that can be trusted by its clients, by its dependencies, and by the microservice ecosystem as a whole. A reliable microservice is one that has truly earned the trust that is essential and required in order for it to serve production traffic.</p>
+
+<p>While stability is related to mitigating the negative side effects accompanying change, and reliability is related to trust, the two are inextricably linked. Each stability requirement also carries a reliability requirement alongside it: for example, developers should not only seek to have stable deployment processes, they should also ensure that each deployment is reliable from the point of view of one of their clients or dependencies.</p>
+
+<p>The trust that reliability secures can be broken into several requirements, the same way we determined requirements for stability. For example, we can make our deployment processes reliable by making sure that our integration tests are comprehensive and our staging and canary deployment phases are successful so that every change introduced into production can be trusted not to contain any errors that might compromise its clients and dependencies.</p>
+
+<p>By building reliability into our microservices, we can protect their availability. We can cache data so that it will be readily available to client services, helping them protect their SLAs by making our own services highly available. To protect our own SLA from any problems with the availability of our dependencies, we can implement defensive caching.</p>
+
+<p>The last reliability requirement is related to routing and discovery. Availability requires that the communication and routing between different services be reliable: health checks should be accurate, requests and responses should reach their destinations, and errors should be handled carefully and appropriately.</p>
+<aside data-type="sidebar">
+<h5>Reliability Requirements</h5>
+<p>The requirements of building a reliable microservice are:</p>
+
+<ul>
+<li>
+<p>A reliable deployment process</p>
+</li>
+<li>
+<p>Planning, mitigating, and protecting against the failures of dependencies</p>
+</li>
+<li>
+<p>Reliable routing and discovery</p>
+</li>
+</ul>
+
+<p>The details of production-ready reliability requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#stability_reliability.asciidoc">#stability_reliability.asciidoc</a>.</em></p>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Scalability</h2>
+
+<p>Microservice <a data-type="indexterm" data-primary="standardization" data-secondary="reliability" data-startref="prs2r"/><a data-type="indexterm" data-primary="reliability" data-startref="r2"/><a data-type="indexterm" id="prs2scal" data-primary="standardization" data-secondary="scalability"/><a data-type="indexterm" id="scal2" data-primary="scalability" data-seealso="scalability and performance"/>traffic is rarely static or constant, and one of the hallmarks of a successful microservice (and of a successful microservice ecosystem) is a steady increase in traffic. Microservices need to be built in preparation for this growth, they need to accommodate it easily, and they need to be able to actively scale with it. A microservice that can&#8217;t scale with growth experiences increased latency, poor availability, and in extreme cases, a drastic increase in incidents and outages. <em>Scalability</em> is essential for availability, making it our third production-readiness standard.</p>
+
+<p>A scalable microservice is one that can handle a large number of tasks or requests at the same time. To ensure a microservice is scalable, we need to know both (1) its qualitative growth scale (e.g., whether it scales with page views or customer orders) and (2) its quantitative growth scale (e.g., how many requests per second it can handle). Once we know the growth scale, <a data-type="indexterm" data-primary="growth scale"/>we can plan for future capacity needs and identify resource bottlenecks and requirements.</p>
+
+<p>The way a microservice handles <a data-type="indexterm" data-primary="scalability" data-secondary="in traffic handling"/><a data-type="indexterm" data-primary="traffic handling"/>traffic should also be scalable. It should be prepared for bursts of traffic, handle them carefully, and prevent them from taking down the service entirely. It&#8217;s easier said than done, but without scalable traffic handling, developers can (and will) find themselves looking at a broken microservice ecosystem.</p>
+
+<p>Additional complexity is introduced by the rest of the microservice ecosystem. The inevitable additional traffic and growth from a service&#8217;s clients have to be prepared for. Likewise, any <a data-type="indexterm" data-primary="scalability" data-secondary="of dependencies"/><a data-type="indexterm" data-primary="dependencies" data-secondary="scaling"/>dependencies of the service should be alerted when increases in traffic are expected. Cross-team communication and collaboration are essential for scalability: regularly communicating with clients and dependencies about a service&#8217;s scalability requirements, status, and any bottlenecks ensures that any services relying on each other are prepared for growth and for potential pitfalls.</p>
+
+<p>Last but not least, the way a microservice stores <a data-type="indexterm" data-primary="scalability" data-secondary="of data storage"/><a data-type="indexterm" data-primary="data storage" data-secondary="scalability of"/>and handles data needs to be scalable as well. Building a scalable storage solution goes a long way toward ensuring the availability of a microservice, and is one of the most essential components of a truly production-ready system.</p>
+<aside data-type="sidebar">
+<h5>Scalability Requirements</h5>
+<p>The requirements of building a scalable microservice are:</p>
+
+<ul>
+<li>
+<p>Well-defined quantitative and qualitative growth scales</p>
+</li>
+<li>
+<p>Identification of resource bottlenecks and requirements</p>
+</li>
+<li>
+<p>Careful, accurate capacity planning</p>
+</li>
+<li>
+<p>Scalable handling of traffic</p>
+</li>
+<li>
+<p>The scaling of dependencies</p>
+</li>
+<li>
+<p>Scalable data storage</p>
+</li>
+</ul>
+
+<p>The details of production-ready scalability requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#scalability_performance.asciidoc">#scalability_performance.asciidoc</a>.</em></p>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Fault Tolerance and Catastrophe-Preparedness</h2>
+
+<p>Even <a data-type="indexterm" data-primary="standardization" data-secondary="scalability" data-startref="prs2scal"/><a data-type="indexterm" data-primary="scalability" data-seealso="scalability and performance" data-startref="scal2"/><a data-type="indexterm" id="ft2" data-primary="fault tolerance"/><a data-type="indexterm" id="cp2" data-primary="catastrophe-preparedness" data-seealso="fault tolerance"/><a data-type="indexterm" id="prs2ftacp" data-primary="standardization" data-secondary="fault tolerance and catastrophe-preparedness"/><a data-type="indexterm" id="pf2" data-primary="predicting failures"/>the simplest of microservices is a fairly complex system. As we know quite well, complex systems fail, they fail often, and any potential failure scenario can and will happen at some point in the microservice&#8217;s lifetime. Microservices don&#8217;t live in isolation, but within dependency chains as part of a larger, incredibly complex microservice ecosystem. The complexity scales linearly with the number of microservice in the overall ecosystem, and ensuring the availability of not only an individual microservice, but the ecosystem as a whole, requires that we impose yet another production-readiness standard onto each microservice. Every microservice within the ecosystem must be <em>fault tolerant</em> and <em>prepared for any catastrophe</em>.</p>
+
+<p>A fault-tolerant, catastrophe-prepared microservice is one that can withstand both internal and external failures. <a data-type="indexterm" data-primary="internal failures"/><a data-type="indexterm" data-primary="external failures"/>Internal failures are those that the microservice brings on itself: for example, code bugs that aren&#8217;t caught by proper testing lead to bad deploys, causing outages that affect the entire ecosystem. External catastrophes, such as datacenter outages and/or poor configuration management across the ecosystem, lead to outages that affect the availability of every microservice and the entire organization.</p>
+
+<p>Failure scenarios and potential catastrophes can be quite adequately (though not exhaustively) prepared for. Identifying failure and catastrophe scenarios is the first requirement of building a fault-tolerant, production-ready microservice. Once these scenarios have been identified, the hard work of strategizing and planning for when they will occur begins. This has to happen at every level of the microservice ecosystem, and any shared strategies should be communicated across the organization so that mitigation is standardized and predictable.</p>
+
+<p>Standardization of failure mitigation and resolution at the organizational level means that incidents and outages of individual microservices, infrastructure components, or the ecosystem as a whole need to be wrapped into carefully executed, easily understandable procedures. <a data-type="indexterm" data-primary="incident response" data-secondary="procedures for"/>Incident response procedures need to be handled in a coordinated, planned, and thoroughly communicated manner. If incidents and outages are handled in this way, and the structure of incident response is well defined, organizations can avoid lengthy downtimes and protect the availability of the microservices. If every developer knows exactly what they are supposed to do in an outage, knows how to mitigate and resolve problems quickly and appropriately, and knows how to escalate if an issue is beyond their capabilities or control, then the time to mitigation and time to resolution drop drastically.</p>
+
+<p>Making failures and catastrophes predictable means going one step further after identifying failure and catastrophe scenarios and planning for them. It means forcing the microservices, the infrastructure, and the ecosystem to fail in any and all known ways to test the availability of the entire system. This is accomplished through various types of <a data-type="indexterm" data-primary="resiliency testing"/><a data-type="indexterm" data-primary="code testing"/><a data-type="indexterm" data-primary="load testing"/><a data-type="indexterm" data-primary="chaos testing"/>resiliency testing. Code testing (including unit tests, regression tests, and integration tests) is the first step in testing for resiliency. The second step is load testing, where microservices and infrastructure components are tested for their ability to handle drastic changes in traffic. The last, most intense, and most relevant type of resiliency testing is chaos testing, in which failure scenarios are run (both scheduled and randomly) on production services to ensure that microservices and infrastructure components are truly prepared for all known failure scenarios.</p>
+<aside data-type="sidebar">
+<h5>Fault Tolerance and Catastrophe-Preparedness Requirements</h5>
+<p>The requirements of building a fault-tolerant microservice that is prepared for any catastrophe are:</p>
+
+<ul>
+<li>
+<p>Potential catastrophes and failure scenarios are identified and planned for.</p>
+</li>
+<li>
+<p>Single points of failure are identified and resolved.</p>
+</li>
+<li>
+<p>Failure detection and remediation strategies are in place.</p>
+</li>
+<li>
+<p>It is tested for resiliency through code testing, load testing, and chaos testing.</p>
+</li>
+<li>
+<p>Traffic is managed carefully in preparation for failure.</p>
+</li>
+<li>
+<p>Incidents and outages are handled appropriately and productively.</p>
+</li>
+</ul>
+
+<p>The details of production-ready fault tolerance and catastrophe-preparedness requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#fault_tolerance.asciidoc">#fault_tolerance.asciidoc</a>.</em></p>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Performance</h2>
+
+<p>In <a data-type="indexterm" data-primary="fault tolerance" data-startref="ft2"/><a data-type="indexterm" data-primary="catastrophe-preparedness" data-seealso="fault tolerance" data-startref="cp2"/><a data-type="indexterm" data-primary="standardization" data-secondary="fault tolerance and catastrophe-preparedness" data-startref="prs2ftacp"/><a data-type="indexterm" data-primary="predicting failures" data-startref="pf2"/><a data-type="indexterm" data-primary="standardization" data-secondary="performance"/><a data-type="indexterm" data-primary="performance"/>the context of the microservice ecosystem, scalability (which we covered in brief detail earlier), is related to how many requests a microservice can handle. Our next production-readiness principle—<em>performance</em>—refers to how well the microservice handles those requests. A performant microservice is one that handles requests quickly, processes tasks efficiently, and properly utilizes resources (such as hardware and other infrastructure components).</p>
+
+<p>A microservice that makes a large number of expensive network calls, for example, is not performant. Neither is a microservice that processes and handles tasks synchronously in cases when asynchronous (nonblocking) task processing would increase the performance and availability of the service. Identifying and architecting away these performance problems is a strict production-readiness requirement.</p>
+
+<p>Similarly, dedicating a large number of <a data-type="indexterm" data-primary="resource utilization"/>resources (like CPU) to a microservice that doesn&#8217;t utilize it is inefficient. Inefficiency reduces performance: if it&#8217;s not clear at <span class="keep-together">the microservice</span> level in every case, it&#8217;s painful and costly at the ecosystem level. Underutilized hardware resources affects the bottom line, and hardware is not cheap. There&#8217;s a fine line between underutilization and proper capacity planning, and so the two must be planned and understood together in order for the availability of the microservice to not be compromised and the cost of underutilization reasonable.</p>
+<aside data-type="sidebar">
+<h5>Performance Requirements</h5>
+<p>The requirements of building a performant microservice are:</p>
+
+<ul>
+<li>
+<p>Appropriate service-level agreements (SLAs) for availability</p>
+</li>
+<li>
+<p>Proper task handling and processing</p>
+</li>
+<li>
+<p>Efficient utilization of resources</p>
+</li>
+</ul>
+
+<p>The details of production-ready performance requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#scalability_performance.asciidoc">#scalability_performance.asciidoc</a>.</em></p>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Monitoring</h2>
+
+<p>Another <a data-type="indexterm" id="prs2m" data-primary="standardization" data-secondary="monitoring"/><a data-type="indexterm" id="mon2" data-primary="monitoring"/>principle necessary for guaranteeing microservice availability is proper microservice <em>monitoring</em>. Good monitoring has three components: proper logging of all important and relevant information; useful graphical displays (dashboards) that are easily understood by any developer in the company and that accurately reflect the health of the services; and alerting on key metrics that is effective and actionable.</p>
+
+<p>Logging <a data-type="indexterm" data-primary="logging"/>belongs and begins in the codebase of each microservice. Determining precisely what information to log will differ for each service, but the goal of logging is quite simple: when faced with a bug—even one from many deployments in the past—you want and need your logging to be such that you can determine from the logs exactly what went wrong and where things fell apart. In microservice ecosystems, the versioning of microservices is discouraged, so you won&#8217;t have a precise version to refer to in which to find any bugs or problems. Code is revised frequently, deployments happen multiple times per week, features are added constantly, and dependencies are ever-changing, but logs will stay the same, preserving the information needed to pinpoint any problems. Just make sure your logs contain the information necessary to determine possible problems.</p>
+
+<p>All <a data-type="indexterm" data-primary="key metrics displays" data-seealso="dashboards"/><a data-type="indexterm" data-primary="dashboards"/>key metrics (such as hardware utilization, database connections, responses and average response times, and the status of API endpoints) should be graphically displayed in real time on an easily accessible dashboard. Dashboards are an important component of building a well-monitored, production-ready microservice: they make it easy to determine the health of a microservice with one glance and enable developers to detect strange patterns and anomalies that may not be extreme enough to trigger alerting thresholds. When used wisely, dashboards allow developers to determine whether or not a microservice is working correctly simply by looking at the dashboard, but developers should never need to watch the dashboard in order to detect incidents and outages, and rollbacks to stable previous builds should be fully automated.</p>
+
+<p>The actual <a data-type="indexterm" data-primary="alerts"/>detection of failures is accomplished through alerting. All key metrics must be alerted on, including (at the very least) CPU and RAM utilization, number of file descriptors, number of database connections, the SLA of the service, requests and responses, the status of API endpoints, errors and exceptions, the health of the service&#8217;s dependencies, information about any database(s), and the number of tasks being processed (if applicable).</p>
+
+<p>Normal, warning, and critical thresholds need to be set for each of these key metrics, and any deviation from the norm (i.e., hitting the warning or critical thresholds) should trigger an alert to the developers who are on call for the service. Thresholds should be signal-providing: high enough to avoid noise, but low enough to catch any and all real problems.</p>
+
+<p>Alerts need to be useful and actionable. A nonactionable alert is not a useful alert, and a waste of engineering hours. Every actionable alert—that is, <em>every</em> alert—should be accompanied by a runbook. For example, if an alert is triggered on a high number of exceptions of a certain type, then there needs to be a runbook containing mitigation strategies that any on-call developer can refer to while attempting to resolve the problem.</p>
+<aside data-type="sidebar">
+<h5>Monitoring Requirements</h5>
+<p>The requirements of building a properly monitored microservice are:</p>
+
+<ul>
+<li>
+<p>Proper logging and tracing throughout the stack</p>
+</li>
+<li>
+<p>Well-designed dashboards that are easy to understand and accurately reflect the health of the service</p>
+</li>
+<li>
+<p>Effective, actionable alerting accompanied by runbooks</p>
+</li>
+<li>
+<p>Implementing and maintaining an on-call rotation</p>
+</li>
+</ul>
+
+<p>The details of production-ready monitoring requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>.</em></p>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Documentation</h2>
+
+<p>Microservice architecture <a data-type="indexterm" data-primary="standardization" data-secondary="monitoring" data-startref="prs2m"/><a data-type="indexterm" data-primary="monitoring" data-startref="mon2"/><a data-type="indexterm" id="prs2dau" data-primary="standardization" data-secondary="documentation and understanding"/><a data-type="indexterm" id="d2" data-primary="documentation"/><a data-type="indexterm" id="uom2" data-primary="understanding of microservices"/>carries the potential for <a data-type="indexterm" data-primary="technical debt reduction"/>increased technical debt—it&#8217;s one of the key trade-offs that come with adopting microservices. As a rule, technical debt tends to increase <em>with</em> developer velocity: the more quickly a service can be iterated on, changed, and deployed, the more frequently shortcuts and patches will be put into place. Organizational clarity and structure around the <em>documentation</em> and <em>understanding</em> of a microservice cut through this technical debt and shave off a lot of the confusion, lack of awareness, and lack of architectural comprehension that tend to accompany it.</p>
+
+<p>Reducing technical debt isn&#8217;t the only reason to make good documentation a production-readiness principle: doing so would make it somewhat of an afterthought (an important afterthought, but an afterthought nonetheless). No, just like each of the other production-readiness standards, documentation and its counterpart (understanding) directly and measurably influence the availability of a microservice.</p>
+
+<p>To see why this is true, we can think about how teams of developers work together and share their knowledge and understanding of a microservice. You can do this yourself by sitting one of your development teams in a room, in front of a whiteboard, and asking them to sketch the architecture and all important details of the service. I promise you will be surprised by the result of this exercise, and you will most likely find that knowledge and understanding of the service is not cohesive or coherent across the group. One developer will know one thing about the application that nobody else does, while a second developer will have such a different understanding of the microservice that you will wonder if they are even contributing to the same codebase. When it&#8217;s time for code changes to be reviewed, technologies to be swapped, or features to be added, the lack of alignment of knowledge and understanding will lead to the design and/or evolution of microservices that are not production-ready, containing serious flaws that undermine the service&#8217;s ability to reliably serve production traffic.</p>
+
+<p>This confusion and the problems that it creates can be successfully and rather easily avoided by requiring that every microservice follow a very strictly standardized set of documentation requirements. Documentation needs to contain all the essential knowledge (facts) about a microservice, including an architecture diagram, an onboarding and development guide, details about the request flow and any API endpoints, and an on-call runbook for each of the service&#8217;s alerts.</p>
+
+<p>Understanding of a microservice can be accomplished in several ways. The first is by doing the exercise I just mentioned: stick the development team in a conference room, and ask them to whiteboard the architecture of the service. Thanks to our old friend, the ever-present increased developer velocity, microservices change radically at different times throughout their lifecycle. By making these architecture reviews part of each team&#8217;s process and scheduling them regularly, you can guarantee that knowledge and understanding about any changes in the microservice will be disseminated to the entire team.</p>
+
+<p>To cover the second aspect of microservice understanding, we need to jump up by one level of abstraction and consider the production-readiness standards themselves. A great deal of  microservice understanding is captured by determining whether a microservice is production-ready and where it stands with regard to the production-readiness standards and their individual requirements. This can be accomplished in a myriad of ways, one of which is running audits of whether a microservice meets the requirements, and then creating a roadmap for the service detailing how to bring it to a production-ready state. Checking the requirements can also be automated across the organization. We&#8217;ll dive into other aspects of this in more detail in the next section on the implementation of production-readiness standards in an organization that has adopted microservice architecture.</p>
+<aside data-type="sidebar">
+<h5>Documentation Requirements</h5>
+<p>The requirements of building a well-documented microservice are:</p>
+
+<ul>
+<li>
+<p>Thorough, updated, and centralized documentation containing all of the relevant and essential information about the microservice</p>
+</li>
+<li>
+<p>Organizational understanding at the developer, team, and ecosystem levels</p>
+</li>
+</ul>
+
+<p>The details of production-ready documentation requirements are covered in <em><a data-type="xref" data-xrefstyle="chap-num-title" href="#documentation.asciidoc">#documentation.asciidoc</a>.</em><a data-type="indexterm" data-primary="standardization" data-startref="prs2"/></p>
+</aside>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Implementing Production-Readiness</h1>
+
+<p>We now <a data-type="indexterm" data-primary="standardization" data-secondary="documentation and understanding" data-startref="prs2dau"/><a data-type="indexterm" data-primary="documentation" data-startref="d2"/><a data-type="indexterm" data-primary="understanding of microservices" data-startref="uom2"/><a data-type="indexterm" id="pri2" data-primary="production-readiness" data-secondary="standards implementation"/><a data-type="indexterm" id="ipr2" data-primary="implenting production-readiness"/><a data-type="indexterm" id="s2io" data-primary="standardization" data-secondary="importance and implementation of"/>have a set of standards that apply to every microservice in any microservice ecosystem, each with its own set of specific requirements. Any microservice that satisfies these requirements can be trusted to serve production traffic and guarantee a high level of availability.</p>
+
+<p>Now that we have the production-readiness standards, the question that remains is <em>how</em> we can implement them in a specialized, real-world microservice ecosystem.  Going from principle to practice and applying theory to real-world applications always presents us with some significant level of difficulty. However, the power of these production-readiness standards and the requirements they impose lies in their remarkable applicability and strict granularity: they are both general enough to apply to any ecosystem, yet specific enough to provide concrete strategies for implementation.</p>
+
+<p>Standardization requires buy-in from all levels of the organization, and must be adopted and driven both from the top-down and from the bottom-up. At the executive and leadership (managerial and technical) levels, these principles need to be driven and supported as architectural requirements for the engineering organization. On the ground floor, within individual development teams, standardization needs to be embraced and implemented. Importantly, standardization needs to be seen and communicated not as a hindrance or gate to development and deployment, but as a guide for production-ready development and deployment.</p>
+
+<p>Many developers may resist standardization. After all, they may argue, isn&#8217;t the point of adopting microservice architecture to provide greater developer velocity, freedom, and productivity? The answer to these sorts of objections is not to deny that the adoption of microservice architecture brings freedom and velocity to development teams, but to agree and point out that that is <em>exactly</em> why production-readiness standards need to be in place. Developer velocity and productivity grind to a halt whenever an outage brings a service down, whenever a bad deploy compromises the availability of a microservice&#8217;s clients and dependencies, whenever a failure that <em>could have been avoided with proper resiliency testing</em> brings the entire microservice ecosystem down. If we&#8217;ve learned anything in the past 50 years about software development, we&#8217;ve learned that standardization brings freedom and reduces entropy. As Brooks says in <em>The Mythical Man-Month</em>, <a data-type="indexterm" data-primary="The  Mythical Man-Month (Brooks)" data-primary-sortas="Mythical Man-Month"/><a data-type="indexterm" data-primary="Brooks, Frederick"/>perhaps the greatest collection of essays on the practice of software engineering, "form is liberating."</p>
+
+<p>Once the engineering organization has adopted and agreed to follow production-readiness standards, the next step is to evaluate and elaborate on each standard&#8217;s requirements. The requirements presented here and detailed throughout this book are very general and need the addition of context and organization-specific details and implementation strategies. What needs to be done is to work through each production-readiness standard and its requirements and to figure out how each requirement can be implemented in the engineering organization. For example, if the organization&#8217;s microservice ecosystem has a self-service deployment tool, then implementing a stable and reliable deployment process needs to be communicated in terms of the internal deployment tool and how it works. Rebuilding internal tools and/or adding features to them may also come out of this exercise.</p>
+
+<p>The actual implementation of the requirements and determining whether or not a given microservice meets them can be done by the developers themselves, by team leads, by management, or by operations (systems, DevOps, or site reliability) engineers. At both Uber and the several other companies I know that have adopted production-readiness standardization, the implementation and enforcement of the production-readiness standards is driven by the site reliability engineering (SRE) organizations. <a data-type="indexterm" data-primary="site reliability engineers (SREs)"/>Typically, SREs are responsible for the availability of the services, and so driving these standards across the microservice ecosystem fits in quite well with existing responsibilities. That isn&#8217;t to say that the developers or development teams have no responsibility for ensuring their services are production-ready; rather, SREs inform, drive, and enforce production-readiness within the microservice ecosystem, and the responsibility of implementation falls on both the SREs embedded within development teams and on the developers themselves.</p>
+
+<p>Building and maintaining a production-ready microservice ecosystem is not an easy challenge to undertake, but the rewards are great, and the impact can be seen so clearly in the increased availability of each microservice. Implementing production-readiness standards and their requirements provides measurable results, and means that development teams can work knowing that the services they depend on are trustworthy, that they are stable, reliable, fault tolerant, performant, monitored, documented, and prepared for any catastrophe.<a data-type="indexterm" data-primary="production-readiness" data-secondary="standards implementation" data-startref="pri2"/><a data-type="indexterm" data-primary="implenting production-readiness" data-startref="ipr2"/><a data-type="indexterm" data-primary="standardization" data-secondary="importance and implementation of" data-startref="s2io"/></p>
+</section>
+
+
+
+
+
+
+
+</section>

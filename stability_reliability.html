@@ -1,0 +1,608 @@
+<section data-type="chapter" id="stability_reliability.asciidoc">
+<h1>Stability and Reliability</h1>
+
+
+<p>A <a data-type="indexterm" id="sar3" data-primary="stability and reliability"/><a data-type="indexterm" id="sar3io" data-primary="stability and reliability" data-secondary="importance of"/><a data-type="indexterm" data-primary="reliability" data-seealso="stability and reliability"/>production-ready microservice is stable and reliable. Both individual microservices and the overall microservice ecosystem are constantly changing and evolving, and any efforts made to increase the stability and reliability of a microservice go a long way toward ensuring the health and availability of the overall ecosystem. In this chapter, different ways to build and run a stable and reliable microservice are explored, including standardizing the development process, building comprehensive deployment pipelines, understanding dependencies and protecting against their failures, building stable and reliable routing and discovery, and establishing appropriate deprecation and decommissioning procedures for old or outdated microservices and/or their endpoints.</p>
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Principles of Building Stable and Reliable Microservices</h1>
+
+<p>Microservice architecture <a data-type="indexterm" id="sar3po" data-primary="stability and reliability" data-secondary="principles of"/>lends itself to fast-paced development. The freedom offered by microservices means that the ecosystem will be in a state of continuous change, never static, always evolving. Features will be added every day, new builds will be deployed multiple times per day, and old technologies will be swapped for newer and better ones at an astounding pace. This freedom and flexibility gives rise to real, tangible innovation, but comes at a great cost.</p>
+
+<p>Innovation, increased developer velocity and productivity, rapid technological advancement, and the ever-changing microservice ecosystem can all very quickly be brought to a screeching halt if any piece of the microservice ecosystem becomes unstable or unreliable. In some cases, all it takes to bring the entire business down is deploying a broken build or a build containing a bug to one business-critical microservice.</p>
+
+<p>A <em>stable</em> microservice is one for which development, deployment, the adoption of new technologies, and the decommissioning or deprecation of other services do not give rise to instability across the larger microservice ecosystem. This requires putting measures into place to protect against the negative consequences that may be introduced by these types of changes. A <em>reliable</em> microservice is one that can be trusted by other microservices and by the overall ecosystem. Stability goes hand in hand with reliability because each stability requirement carries with it a reliability requirement (and vice versa): for example, stable deployment processes are accompanied by a requirement that each new deployment does not compromise the reliability of the microservice from the point of view of one of their clients or <a data-type="indexterm" data-primary="stability and reliability" data-secondary="importance of" data-startref="sar3io"/>dependencies.</p>
+
+<p>There are several things that can be done to ensure that a microservice is stable and reliable. A standardized <em>development cycle</em> can be implemented to protect against poor development practices. The <em>deployment</em> process can be designed so that changes to the code are forced to pass through multiple stages before being rolled out to all production servers. <em>Dependency</em> failures can be protected against. Health checks, proper routing, and circuit breaking can be built into the <em>routing and discovery</em> channels to handle anomalous traffic patterns. Finally, microservices and their endpoints can be <em>deprecated</em> and/or <em>decommissioned</em> without causing any failures for other microservices.</p>
+<aside data-type="sidebar">
+<h5>A Production-Ready Service Is Stable and Reliable</h5>
+<ul>
+<li>
+<p>It has a standardized development cycle.</p>
+</li>
+<li>
+<p>Its code is thoroughly tested through lint, unit, integration, and end-to-end <span class="keep-together">testing</span>.</p>
+</li>
+<li>
+<p>Its test, packaging, build, and release process is completely automated.</p>
+</li>
+<li>
+<p>It has a standardized deployment pipeline, containing staging, canary, and production phases.</p>
+</li>
+<li>
+<p>Its clients are known.</p>
+</li>
+<li>
+<p>Its dependencies are known, and there are backups, alternatives, fallbacks, and caching in place in case of failures.</p>
+</li>
+<li>
+<p>It has stable and reliable routing and discovery in place.</p>
+</li>
+</ul>
+</aside>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1" id="development_cycle">
+<h1>The Development Cycle</h1>
+
+<p>The <a data-type="indexterm" data-primary="stability and reliability" data-secondary="principles of" data-startref="sar3po"/><a data-type="indexterm" id="sar3dc" data-primary="stability and reliability" data-secondary="development cycle"/><a data-type="indexterm" id="dc3" data-primary="development cycle"/>stability and reliability of a microservice begins with the individual developer who is contributing code to the service. The majority of outages and microservice failures are caused by bugs introduced into the code that were not caught in the development phase, in any of the tests, or at any step in the deployment process. Mitigating and resolving these outages and failures usually entails nothing more than rolling back to the latest stable build, reverting whatever commit contained the bug, and re-deploying a new (bug-less) version of the code.</p>
+<div data-type="warning"><h1>The True Cost of Unstable and Unreliable Development</h1>
+<p>A microservice ecosystem is not the Wild West. Every outage, every incident, and every bug can and will cost the company thousands (if not millions) of dollars in engineering hours and lost revenue. Safeguards need to be in place during the development cycle (and, as we will see, in the deployment pipeline) to catch every bug before it hits production.</p>
+</div>
+
+<p>A stable and reliable development cycle has several steps (<a data-type="xref" href="#development_cycle_fig"/>).</p>
+
+<figure id="development_cycle_fig">
+<img src="images/prms_0301.png" alt="images/chapter3/development_cycle.png"/>
+<figcaption>The development cycle</figcaption>
+</figure>
+
+<p>First, the developer makes a change to the code. This will usually begin with checking a copy of the code out from a central repository (usually using git or svn), creating an individual branch where they will make changes, adding their changes to their branch, and running any unit and integration tests. This stage of development can happen anywhere: locally on a developer&#8217;s laptop or on a server in a development environment. A reliable development environment—one that accurately mirrors the production world—is key, especially if testing the service in question requires making requests to other microservices or reading or writing data to a database.</p>
+
+<p>Once the code has been committed to the central repository, the second step consists in having the change(s) reviewed carefully and thoroughly by other engineers on the team. If all reviewers have approved the change(s), and all lint, unit, and integration tests have passed on a new build, the change can be merged into the repository (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#fault_tolerance.asciidoc">#fault_tolerance.asciidoc</a>, for more on lint, unit, and integration tests). Then, and only then, can the new change be introduced into the deployment pipeline.</p>
+<div data-type="tip"><h1>Test Before Code Review</h1>
+<p>One way <a data-type="indexterm" data-primary="code reviews"/>to ensure that all bugs are caught before they hit production is to run all lint, unit, integration, and end-to-end tests <em>before</em> the code review phase. This can be accomplished by having developers work on a separate branch, kicking off all tests on that branch as soon as the developer submits it for code review, and then only allowing it to reach code review (or only allowing it to be built) <em>after</em> it successfully passes all tests.</p>
+</div>
+
+<p>As <a data-type="indexterm" data-primary="stability and reliability" data-secondary="development cycle" data-startref="sar3dc"/><a data-type="indexterm" data-primary="development cycle" data-startref="dc3"/>mentioned in the section on layer 4 of the microservice ecosystem in <a data-type="xref" data-xrefstyle="chap-num-title" href="#microservices.asciidoc">#microservices.asciidoc</a>, a lot happens in between the development cycle and the deployment pipeline. The new release needs to be packaged, built, and thoroughly tested before reaching the first stage of the deployment pipeline.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1" id="deployment_pipeline">
+<h1>The Deployment Pipeline</h1>
+
+<p>There <a data-type="indexterm" id="sar3dp" data-primary="stability and reliability" data-secondary="deployment pipeline"/><a data-type="indexterm" id="dp3" data-primary="deployment pipeline"/>is a great deal of room for human error in microservice ecosystems, especially where deployment practices are concerned, and (as I mentioned earlier) the majority of outages in large-scale production systems are caused by bad deployments. Consider the organizational sprawl that accompanies the adoption of microservice architecture and what it entails for the deployment process: you have, at the very least, dozens (if not hundreds or thousands) of independent, isolated teams who are deploying changes to their microservices on their own schedules, and often without cross-team coordination between clients and dependencies. If something goes wrong, if a bug is introduced into production, or if a service is temporarily unavailable during deployment, then the entire ecosystem can be negatively affected. To ensure that things go wrong with less frequency, and that any failures can be caught before being rolled out to all production servers, introducing a standardized <em>deployment pipeline</em> across the engineering organization can help ensure stability and reliability across the ecosystem.</p>
+
+<p>I refer to the deployment process here as a "pipeline" because the most trustworthy deployments are those that have been required to pass a set of tests before reaching production servers. We can fit three separate stages or phases into this pipeline (<a data-type="xref" href="#stages_of_a_stable_pipeline"/>): first, we can test a new release in a <em>staging</em> environment; second, if it passes the staging phase, we can deploy it to a small <em>canary</em> environment, where it will serve 5%–10% of production traffic; and third, if it passes the canary phase, we can slowly roll it out to <em>production</em> servers until it has been deployed to every host.</p>
+
+<figure id="stages_of_a_stable_pipeline">
+<img src="images/prms_0302.png" alt="images/chapter3/deployment_pipeline.png"/>
+<figcaption>Stages of a stable and reliable deployment pipeline</figcaption>
+</figure>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Staging</h2>
+
+<p>Any <a data-type="indexterm" id="dp3se" data-primary="deployment pipeline" data-secondary="staging environment"/><a data-type="indexterm" id="se3" data-primary="staging environment"/>new release can first be deployed to a <em>staging</em> environment. A staging environment should be an exact copy of the production environment: it is a reflection of the state of the real world, but without real traffic. Staging environments usually aren&#8217;t running at the same scale as production (i.e., they typically aren&#8217;t run with the same number of hosts as production, a phenomenon also known as <em>host parity</em>), <a data-type="indexterm" data-primary="host parity"/>because running what would amount to two separate ecosystems can present a large hardware cost to the company. However, some engineering organizations may determine that the only way to accurately copy the production environment in a stable and reliable way is to build an identical staging environment with host parity.</p>
+
+<p>For most engineering organizations, determining the hardware capacity and scale of the staging environment as a percentage of production is usually accurate enough. The necessary staging capacity can be determined by the method we will use to test the microservice within the staging phase. To test in the staging environment, we have several options: we can run mock (or recorded) traffic through the microservice; we can test it manually by hitting its endpoints and evaluating its responses; we can run automated unit, integration, and other specialized tests; or we can test each new release with any combination of these methods.</p>
+<div data-type="tip"><h1>Treat Staging and Production as Separate Deployments of the Same Service</h1>
+<p>You may be tempted to run staging and production as separate services and store them in separate repositories. This <em>can</em> be done successfully, but it requires that changes be synchronized across both services and repositories, including configuration changes (which are often forgotten about). It&#8217;s much easier to treat staging and production as separate "deployments" or "phases" of the same microservice.</p>
+</div>
+
+<p>Even though staging environments <em>are</em> testing environments, they differ from both the development phase and the development environment in that a release that has been deployed to staging is a release that is a <em>candidate for production</em>. A candidate for production <a data-type="indexterm" data-primary="staging environment" data-secondary="candidates for production"/><a data-type="indexterm" data-primary="candidates for production"/>must have already successfully passed lint tests, unit tests, integration tests, and code review before being deployed to a staging environment.</p>
+
+<p>Deploying to a staging environment should be treated by developers with the same seriousness and caution as deploying to production. If a release is successfully deployed to staging, it can be automatically deployed to canaries, which <em>will</em> be running production traffic.</p>
+
+<p>Setting up staging environments in a microservice ecosystem can be difficult, due to the complexities introduced by dependencies. If your microservice depends on nine other microservices, then it relies on those dependencies to give accurate responses when requests are sent and reads or writes to the relevant database(s) are made. As a consequence of these complexities, the success of a staging environment hinges on the way staging is standardized across the company.</p>
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Full staging</h3>
+
+<p>There <a data-type="indexterm" id="fs3" data-primary="full staging"/><a data-type="indexterm" id="se3fs" data-primary="staging environment" data-secondary="full staging"/>are several ways that the staging phase of the deployment pipeline can be configured. The first is <em>full staging</em> (<a data-type="xref" href="#full_staging_fig"/>), where a separate staging ecosystem is running as a complete mirror copy of the entire production ecosystem (though not necessarily with host parity). Full staging still runs on the same core infrastructure as production, but there are several key differences. Staging environments of the services are, at the very least, made accessible to other services by staging-specific frontend and backend ports. Importantly, staging environments in a full-staging ecosystem communicate <em>only with the staging environments of other services</em>, and never send any requests or receive any responses from any services running in production (which means sending traffic to production ports from staging is off limits).</p>
+
+<figure id="full_staging_fig">
+<img src="images/prms_0303.png" alt="images/chapter3/full_staging.png"/>
+<figcaption>Full staging</figcaption>
+</figure>
+
+<p>Full staging requires every microservice to have a fully functional staging environment that other microservices can communicate with when new releases are deployed. Communicating with other microservices within the staging ecosystem can be accomplished either by writing specific tests that are kicked off when a new build is deployed to the staging environment, or as mentioned, by running old recorded production traffic or mock traffic through the service being deployed along with all upstream and downstream dependencies.</p>
+
+<p>Full staging also requires careful handling of test data: staging environments should <em>never</em> have write access to any production databases, and granting read access to production databases is discouraged as well. Because full staging is designed to be a complete mirror copy of production, every microservice staging environment should contain a separate test database that it can read from and write to.</p>
+<div data-type="warning"><h1>Risks of Full Staging</h1>
+<p>Caution needs to be taken when implementing and deploying full staging environments, because new releases of services will almost always be communicating with other new releases of any upstream and downstream dependencies—this may not be an accurate reflection of the real world. Engineering organizations may need to require teams to coordinate and/or schedule deployments to staging to avoid the deployment of one service breaking the staging environment for all other <a data-type="indexterm" data-primary="full staging" data-startref="fs3"/><a data-type="indexterm" data-primary="staging environment" data-secondary="full staging" data-startref="se3fs"/>related services.</p>
+</div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3">
+<h3>Partial staging</h3>
+
+<p>The <a data-type="indexterm" id="ps3" data-primary="partial staging"/><a data-type="indexterm" id="se3ps" data-primary="staging environment" data-secondary="partial staging"/>second type of staging environment is known as <em>partial staging</em>. As the name suggests, it is not a complete mirror copy of the production environment. Rather, each microservice has its own staging environment, which is a pool of servers with (at the very least) staging-specific frontend and backend ports, and when new builds are introduced into the staging phase, they communicate with the upstream clients and downstream dependencies that are running in production (<a data-type="xref" href="#partial_staging_fig"/>).</p>
+
+<figure id="partial_staging_fig">
+<img src="images/prms_0304.png" alt="images/chapter3/partial_staging.png"/>
+<figcaption>Partial staging</figcaption>
+</figure>
+
+<p>Partial staging deployments should hit all production endpoints of a microservice&#8217;s clients and dependencies to mimic the state of the actual world as accurately as possible. Specific staging tests will need to be written and run to accomplish this, and every new feature added should probably be accompanied by at least one additional staging test to ensure that it is tested thoroughly.</p>
+<div data-type="warning"><h1>Risks of Partial Staging</h1>
+<p>Because microservices with partial staging environments communicate with production microservices, extreme care must be taken. Even though partial staging is restricted to read-only requests, production services can easily be taken down by bad staging deploys that send bad requests and/or overload production services with too many requests.</p>
+</div>
+
+<p>These types of staging environments should also be restricted to read-only database access: a staging environment should never write to a production database. However, some microservices may be very write-heavy, and testing the write functionality of a new build will be essential. The most common way of doing this is to mark any data written by a staging environment as <em>test data</em> (this is known as <em>test tenancy</em>), <a data-type="indexterm" data-primary="test tenancy"/>but the safest way to do this is to write to a separate test database, since giving write access to a staging environment still runs the risk of altering real-world data. See <a data-type="xref" href="#table0301"/> for a comparison of full and partial staging environments.</p>
+<table id="table0301">
+<caption>Full versus partial staging environments</caption>
+<thead>
+<tr>
+<th></th>
+<th>Full staging</th>
+<th>Partial staging</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>Complete copy of production environment</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr>
+<td><p>Separate staging frontend and backend ports</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr>
+<td><p>Access to production services</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr>
+<td><p>Read access to production databases</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr>
+<td><p>Write access to production databases</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr>
+<td><p>Requires automated rollbacks</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Staging <a data-type="indexterm" data-primary="full staging"/><a data-type="indexterm" data-primary="staging environment" data-secondary="full staging"/>environments (full or partial) should have dashboards, monitoring, and logging just like production environments—all of which should be set up identically to the dashboards, monitoring, and logging of the production environment of the microservice (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>). The graphs for all key metrics can be kept on the same dashboard as all production metrics, though teams may opt to have separate dashboards for each part of the deployment process: a staging dashboard, a canary dashboard, and a production dashboard. Depending on how dashboards are configured, it may be best to keep all graphs for all deployments on one dashboard and to organize them by deployment (or by metric). Regardless of how a team decides to set up their dashboards, the goal of building good and useful production-ready dashboards should not be forgotten: the dashboard(s) of a production-ready microservice should make it easy for an outsider to quickly determine the health and status of the service.</p>
+
+<p>Monitoring and logging for the staging environment should be identical to the monitoring and logging of the staging and production deployments so that any failures of tests and errors in new releases that are deployed to staging will be caught before they move to the next phase of the deployment pipeline. It&#8217;s extremely helpful to set up alerts and logs so that they are differentiated and separated by deployment type, ensuring that any alerts triggered by failures or errors will specify which environment is experiencing the problem, making debugging, mitigation, and resolution of any bugs or failures rather easy and straightforward.</p>
+
+<p>The purpose of a <a data-type="indexterm" data-primary="staging environment" data-secondary="purpose of"/>staging environment is to catch any bugs introduced by code changes before they affect production traffic. When a bug is introduced by the code, it will usually be caught in the staging environment (if it is set up correctly). Automated rollbacks of bad deploys are a necessity for partial staging environments (though are not required for full staging environments). Establishing when to revert to a previous build should be determined by various thresholds on the microservice&#8217;s key metrics.</p>
+
+<p>Since partial staging requires interacting with microservices running in production, bugs introduced by new releases deployed to a partial staging environment can bring down other microservices that are running in production. If there aren&#8217;t any automated rollbacks in place, mitigating and resolving these problems needs to be done manually. Any steps of the deployment process that need manual intervention are points of failure not only for the microservice itself, but for the entire microservice ecosystem.</p>
+
+<p>The last question a microservice team needs to answer when setting up a staging environment is how long a new release should run on staging before it can be deployed to canary (and, after that, to production). The answer to this question is determined by the staging-specific tests that are run on staging: a new build is ready to move to the next step of the deployment process as soon as all tests have passed <a data-type="indexterm" data-primary="partial staging" data-startref="ps3"/><a data-type="indexterm" data-primary="staging environment" data-secondary="partial staging" data-startref="se3ps"/><a data-type="indexterm" data-primary="deployment pipeline" data-secondary="staging environment" data-startref="dp3se"/><a data-type="indexterm" data-primary="staging environment" data-startref="se3"/>without failing.</p>
+</section>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Canary</h2>
+
+<p>Once <a data-type="indexterm" id="dp3c" data-primary="deployment pipeline" data-secondary="canary environment"/><a data-type="indexterm" id="ce3" data-primary="canary environment"/>a new release has successfully been deployed to staging and passed all required tests, the build can be deployed to the next stage in the deployment pipeline: the <em>canary</em> environment. The unique name for this environment comes from a tactic used by coal miners: they&#8217;d bring canaries with them into the coal mines to monitor the levels of carbon monoxide in the air; if the canary died, they knew that the level of toxic gas in the air was high, and they&#8217;d leave the mines. Sending a new build into a canary environment serves the same purpose: deploy it to a small pool of servers running production traffic (around 5%–10% of production capacity), and if it survives, deploy to the rest of the production servers.</p>
+<div data-type="tip"><h1>Canary Traffic Distribution</h1>
+<p>If the production service is deployed in multiple different <span class="keep-together">datacenters</span>, regions, or cloud providers, then the canary pool should contain servers in each of these in order to accurately sample production.</p>
+</div>
+
+<p>Since a canary environment serves production traffic, it should be considered part of production. It should have the same backend and frontend ports, and canary hosts should be chosen at random from the pool of production servers to ensure accurate sampling of production traffic. Canaries can (and should) have full access to production services: they should hit all production endpoints of upstream and downstream dependencies, and they should have both read and write access to any databases (if applicable).</p>
+
+<p>As with staging, the <a data-type="indexterm" data-primary="dashboards"/><a data-type="indexterm" data-primary="monitoring"/><a data-type="indexterm" data-primary="logging"/>dashboards, monitoring, and logging should be the same for canaries as for production. Alerts and logs should be differentiated and labeled as coming from the canary deployment so that developers can easily mitigate, debug, and resolve any problems.</p>
+<div data-type="warning"><h1>Separate Ports for Canaries and Production</h1>
+<p>Allocating separate frontend and backend ports for canaries and production so that traffic can be directed deliberately may seem like a good idea, but unfortunately separating out the traffic in this fashion defeats the purpose of canaries: to randomly sample production traffic on a small pool of servers to test a new release.</p>
+</div>
+
+<p>Automated rollbacks <a data-type="indexterm" data-primary="rollbacks, automated"/>absolutely need to be in place for canaries: if any known errors occur, the deployment system needs to automatically revert to the last known stable version. Remember, canaries are serving production traffic, and any problems that happen are affecting the real world.</p>
+
+<p>How long should a new release sit in the canary pool until developers can be satisfied that it is ready for production? This can be minutes, hours, or even days, and the answer is determined by the microservice&#8217;s traffic patterns. The traffic of every microservice is going to have some sort of pattern, no matter how strange your microservice or business may be. A new release should not leave the canary stage of deployment until a full traffic cycle has been completed. How <a data-type="indexterm" data-primary="traffic cycles"/>a "traffic cycle" is defined needs to be standardized across the entire engineering organization, but the duration and requirements of the traffic cycle may need to be <a data-type="indexterm" data-primary="deployment pipeline" data-secondary="canary environment" data-startref="dp3c"/><a data-type="indexterm" data-primary="canary environment" data-startref="ce3"/>created on a service-by-service basis.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Production</h2>
+
+<p><em>Production</em> is the real world. <a data-type="indexterm" data-primary="deployment pipeline" data-secondary="production"/><a data-type="indexterm" data-primary="production"/>When a build has successfully made it through the development cycle, survived staging, and lived through the coal mines of the canary phase, it is ready to be rolled out to the production deployment. At this point in the deployment pipeline—the very last step—the development team should be completely confident in the new build. Any errors in the code should have been discovered, mitigated, and resolved before making it this far.</p>
+
+<p>Every build that makes it to production should be completely stable and reliable. A build being deployed to production should have already been thoroughly tested, and a build should <em>never</em> be deployed to production until it has made it through the staging and canary phases without any issues. Deploying to production can be done in one fell swoop after the build has lived through the canaries, or it can be gradually rolled out in stages: developers can choose to roll out to production by percentage of hardware (e.g., first to 25% of all servers, then to 50%, then 75%, and finally 100%), or by datacenter, or by region, or by country, or any mixture of these.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Enforcing Stable and Reliable Deployment</h2>
+
+<p>By <a data-type="indexterm" id="dp3esard" data-primary="deployment pipeline" data-secondary="enforcing stable and reliable deployment"/><a data-type="indexterm" id="sar3eoid" data-primary="stability and reliability" data-secondary="enforcement of, in deployment"/>the time a new candidate for production has made it through the development process, has survived the staging environment, and has been deployed to the canary phase successfully, the chances of it causing a major outage are very slim, because most bugs in the code will have been caught before the candidate for production is rolled out to production. This is precisely why having a comprehensive deployment pipeline is essential for building a stable and reliable microservice.</p>
+
+<p>For some developers, the delay introduced by the deployment pipeline might seem like an unnecessary burden because it delays their code changes and/or new features from being deployed straight to production minutes after they have been written. In reality, the delay introduced by the phases of the deployment pipeline is very short and easily customizable, but sticking to the standardized deployment process needs to be enforced to ensure reliability. Deploying to a microservice multiple times per day can (and does) compromise the stability and reliability of the microservice and any other services within its complex dependency chain: a microservice that is changing every few hours is rarely a stable or reliable microservice.</p>
+
+<p>Developers may be tempted to skip the staging and canary phases of the deployment process and deploy a fix straight to production if, for example, a serious bug is discovered in production. While this solves the problem quickly, can <em>possibly</em> save the company from losing revenue, and can prevent dependencies from experiencing outages, allowing developers to deploy straight to production should be reserved only for the most severe outages. Without these restrictions in place, there is always the unfortunate possibility of abusing the process and deploying straight to production: for most developers, every code change, every deploy is important and may seem important enough to bypass staging and canary, compromising the stability and reliability of the entire microservice ecosystem. When failures occur, development teams should instead be encouraged to always roll back to the latest stable build of the microservice, which will bring the microservice back to a known (and reliable) state, which can run in production without any issues while the team works to discover the root cause of the failure that occurred.</p>
+<div data-type="warning"><h1>Hotfixes Are an Anti-Pattern</h1>
+<p>When <a data-type="indexterm" data-primary="hotfixes"/>a deployment pipeline is in place, there should never be any direct deployment to production unless there is an emergency, but even this should be discouraged. Bypassing the initial phases of the deployment pipeline often introduces new bugs into production, as emergency code fixes run the risk of not being properly tested. Rather than deploying a hotfix straight to production, developers should roll back to the latest stable build if possible.</p>
+</div>
+
+<p>Stable and reliable deployment isn&#8217;t limited only to following the deployment pipeline, and there are several cases in which blocking a particular microservice from deploying can increase availability across the ecosystem.</p>
+
+<p>If a service isn&#8217;t meeting their SLAs (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#production_readiness.asciidoc">#production_readiness.asciidoc</a>), all deployment can be postponed if the downtime quota of the service has been used up. For example, if a service has an SLA promising 99.99% availability (allowing 4.38 minutes of downtime each month), but has been unavailable for 12 minutes in one month, then new deployments of that microservice can be blocked for the next three months, ensuring that it meets its SLA. If a service fails load testing (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#fault_tolerance.asciidoc">#fault_tolerance.asciidoc</a>), then deployment to production can be locked until the service is able to appropriately pass any necessary load tests. For business-critical services, whose outages would stop the company from functioning properly, it can at times be necessary to block deployment if they do not meet the production-readiness criteria established by the <a data-type="indexterm" data-primary="stability and reliability" data-secondary="deployment pipeline" data-startref="sar3dp"/><a data-type="indexterm" data-primary="deployment pipeline" data-startref="dp3"/><a data-type="indexterm" data-primary="deployment pipeline" data-secondary="enforcing stable and reliable deployment" data-startref="dp3esard"/><a data-type="indexterm" data-primary="stability and reliability" data-secondary="enforcement of, in deployment" data-startref="sar3eoid"/>engineering organization.</p>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Dependencies</h1>
+
+<p>The <a data-type="indexterm" id="sar3d" data-primary="stability and reliability" data-secondary="dependencies"/><a data-type="indexterm" id="d3" data-primary="dependencies"/>adoption of microservice architecture is sometimes driven by the idea that microservices can be built and run in isolation, as fully independent and replaceable components of a larger system. This is true in principle, but in the real world, every microservice has <em>dependencies</em>, both upstream and downstream. Every microservice will receive requests from <em>clients</em> (other microservices) that are counting on the service to perform as expected and to live up to its SLAs, as well as downstream dependencies (other services) that it will depend on to get the job done.</p>
+
+<p>Building and running production-ready microservices requires developers to plan for dependency failures, to mitigate them, and to protect against them. Understanding a service&#8217;s dependencies and planning for their failures is one of the most important aspects of building a stable and reliable microservice.</p>
+
+<p>To understand how important this is, let&#8217;s consider an example microservice called <em>receipt-sender</em>, whose SLA is four-nines (promising 99.99% availability to upstream clients). Now, <em>receipt-sender</em> depends on several other microservices, including one called <em>customers</em> (a microservice that handles all customer information), and one called <em>orders</em> (a microservice that handles information about the orders each customer places). Both <em>customers</em> and <em>orders</em> depend on other microservices: <em>customers</em> depends on yet another microservice we&#8217;ll call <em>customers-dependency</em>, and <em>orders</em> on one we&#8217;ll refer to as <em>orders-dependency</em>. The chances that <em>customers-dependency</em> and <em>orders-dependency</em> have dependencies of their own are very high, so the dependency graph for <em>receipt-sender</em> quickly becomes very, very complicated.</p>
+
+<p>Since <em>receipt-sender</em> wants to protect its SLA and provide 99.99% uptime to all of its clients, its team needs to make sure that the SLAs of all downstream dependencies are strictly adhered to. If the SLA of <em>receipt-sender</em> depends on <em>customers</em> being available 99.99% of the time, but the actual uptime of <em>customers</em> is only 89.99% of the time, the availability of <em>receipt-sender</em> is compromised and is now only 89.98%. Each one of the dependencies of <em>receipt-sender</em> can suffer the same hit to their availability if any of the dependencies in the dependency chain do not meet their SLAs.</p>
+
+<p>A stable and reliable microservice needs to mitigate dependency failures of this sort (and yes, not meeting an SLA is a failure!). This can be accomplished by having backups, fallbacks, caching, and/or alternatives for each dependency just in case they fail.</p>
+
+<p>Before dependency failures can be planned for and mitigated, the dependencies of a microservice must be known, documented, and tracked. Any dependency that could harm a microservice&#8217;s SLA needs to be included in the architecture diagram and documentation of the microservice (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#documentation.asciidoc">#documentation.asciidoc</a>) and should be included on the service&#8217;s dashboard(s) (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#monitoring.asciidoc">#monitoring.asciidoc</a>). In addition, all dependencies should be tracked by automatically creating dependency graphs for each service, which can be accomplished by implementing a distributed tracking system across all microservices in the organization.</p>
+
+<p>Once all of the dependencies are known and tracked, the next step is to set up backups, alternatives, fallbacks, or caching for each dependency. The right way to do this is completely dependent on the needs of the service. For example, if the functionality of a dependency can be filled by calling the endpoint of another service, then failure of the primary dependency should be handled by the microservice so that requests are sent to the alternative instead. If requests that need to be sent to the dependency can be held in a queue when the dependency is unavailable, then a queue should be implemented. Another way to handle dependency failures is to put caching for the dependency into place within the service: cache any relevant data so that any failures will be handled gracefully.</p>
+
+<p>The type of cache most often used in these cases <a data-type="indexterm" data-primary="LRU (Least Recently Used) cache"/>is a <em>Least Recently Used</em> (LRU) cache, in which relevant data is kept in a queue, and where any unused data is deleted when the cache&#8217;s queue fills up. LRU caches are easy to implement (often a single line of code for each instantiation), efficient (no expensive network calls need to be made), performant (the data is immediately available), and do a decent job of mitigating any dependency failures. This is known as <em>defensive caching</em>, <a data-type="indexterm" data-primary="caching, defensive"/>and it is useful for protecting a microservice against the failures of its dependencies: cache the information your microservice gets from its dependencies, and if the dependencies go down, the availability of your microservice will be unaffected. Implementing defensive caching isn&#8217;t necessary for every single dependency, but if a specific dependency or set of dependencies is or are unreliable, defensive caching will prevent your microservice from being <a data-type="indexterm" data-primary="stability and reliability" data-secondary="dependencies" data-startref="sar3d"/><a data-type="indexterm" data-primary="dependencies" data-startref="d3"/>harmed.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Routing and Discovery</h1>
+
+<p>Another <a data-type="indexterm" data-primary="stability and reliability" data-secondary="routing and discovery"/><a data-type="indexterm" data-primary="routing and discovery"/>aspect of building stable and reliable microservices is to ensure that communication and interaction between microservices is itself stable and reliable, which means that layer 2 (the communication layer) of the microservice ecosystem (see <a data-type="xref" data-xrefstyle="chap-num-title" href="#microservices.asciidoc">#microservices.asciidoc</a>) must be built to perform in a way that protects against harmful traffic patterns and maintains trust across the ecosystem. The relevant parts of the communication layer for stability and reliability (aside from the network itself) are service discovery, service registry, and load balancing.</p>
+
+<p>The <em>health</em> of a microservice at both the host level and the service level as a whole should always be known. This means <a data-type="indexterm" data-primary="health checks"/>that <em>health checks</em> should be running constantly so that a request is never sent to an unhealthy host or service. Running health checks on a separate channel (not used for general microservice communication) is the easiest way to ensure that health checks aren&#8217;t ever compromised by something like a clogged network. Hardcoding "200 OK" responses on a <em>/health</em> endpoint for health checks isn&#8217;t ideal for every microservice either, though it may be sufficient for most. Hardcoded responses don&#8217;t tell you much except that the microservice was started on the host semi-successfully: any <em>/health</em> endpoint of a microservice should give a useful, accurate response.</p>
+
+<p>If an instance of a service on a host is unhealthy, the load balancers should no longer route traffic to it. If a microservice as a whole is unhealthy (with all health checks failing on either a certain percentage of hosts or all hosts in production), then traffic should no longer be routed to that particular microservice until the problems causing the health checks to fail are resolved.</p>
+
+<p>However, health checks shouldn&#8217;t be the only determining factor in whether or not a service is healthy. A large number of unhandled exceptions should also lead to a service being marked unhealthy, <a data-type="indexterm" data-primary="circuit breakers"/>and <em>circuit breakers</em>  should be put into place for these failures so that if a service experiences an abnormal amount of errors, no more requests will be sent to the service until the problem is resolved. The key in stable and reliable routing and discovery is this: preserve the microservice ecosystem by preventing bad actors from serving production traffic and accepting requests from other microservices.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Deprecation and Decommissioning</h1>
+
+<p>One <a data-type="indexterm" data-primary="stability and reliability" data-secondary="deprecation and decommissioning"/><a data-type="indexterm" data-primary="deprecation and decommissioning"/><a data-type="indexterm" data-primary="decommissioning"/>often-forgotten, often-ignored cause of instability and unreliability in microservice ecosystems is the <em>deprecation or decommissioning</em> of a microservice or one of its API endpoints. When a microservice is no longer in use or is no longer supported by a development team, its decommissioning should be undertaken carefully to ensure that no clients will be compromised. The deprecation of one or more of a microservice&#8217;s API endpoints is even more common: when new features are added or old ones removed, the endpoints often change, requiring that client teams are updated and any requests made to the old endpoints are switched to new endpoints (or removed entirely).</p>
+
+<p>In most microservice ecosystems, deprecation and decommissioning is more of a sociological problem within the engineering organization than a technical one, making it all the more difficult to address. When a microservice is about to be decommissioned, its development team needs to take care to alert all client services and advise them on how to accommodate the loss of their dependency. If the microservice being decommissioned is being replaced by another new microservice, or if the functionality of the microservice is being built into another existing microservice, then the team should help all clients update their microservices to send requests to the new endpoints. Deprecation of an endpoint follows a similar process: the clients must be alerted, and either given the new endpoint or advised on how to account for the loss of the endpoint entirely. In both deprecation and decommissioning, monitoring plays a critical role: endpoints will need to be monitored closely <em>before</em> the service or endpoint is completely decommissioned and/or deprecated to check for any requests that might still be sent to the outdated service or endpoint.</p>
+
+<p>Conversely, failing to properly deprecate an endpoint or decommission a microservice can also have disastrous effects on the microservice ecosystem. This happens more often than developers would care to admit. In an ecosystem containing hundreds or thousands of microservices, developers are often shifted between teams, priorities change, and both microservices and technologies are swapped out for newer, better ones all of the time. When these old microservices or technologies are left to run, without any (or much) involvement, oversight, or monitoring, any failures will go unnoticed, and any failure that is noticed may not be resolved for a long period of time. If a microservice is going to be left to fend for itself, it risks compromising its clients in case of an outage—such microservices should be decommissioned rather than abandoned.</p>
+
+<p>Nothing is more disruptive to a microservice than the complete loss of one of its dependencies. Nothing causes more instability and unreliability than the sudden, unexpected failure of one of its dependencies, even if the failure was planned for by another team. The importance of stable and reliable decommissioning and deprecation can honestly not be emphasized enough.</p>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>Evaluate Your Microservice</h1>
+
+<p>Now that you have a better understanding of stability and reliability, use the following list of questions to assess the production-readiness of your microservice(s) and microservice ecosystem. The questions are organized by topic, and correspond to the sections within this chapter.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>The Development Cycle</h2>
+
+<ul>
+<li>
+<p>Does the microservice have a central repository where all code is stored?</p>
+</li>
+<li>
+<p>Do developers work in a development environment that accurately reflects the state of production (e.g., that accurately reflects the real world)?</p>
+</li>
+<li>
+<p>Are there appropriate lint, unit, integration, and end-to-end tests in place for the microservice?</p>
+</li>
+<li>
+<p>Are there code review procedures and policies in place?</p>
+</li>
+<li>
+<p>Is the test, packaging, build, and release process automated?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>The Deployment Pipeline</h2>
+
+<ul>
+<li>
+<p>Does the microservice ecosystem have a standardized deployment pipeline?</p>
+</li>
+<li>
+<p>Is there a staging phase in the deployment pipeline that is either full or partial staging?</p>
+</li>
+<li>
+<p>What access does the staging environment have to production services?</p>
+</li>
+<li>
+<p>Is there a canary phase in the deployment pipeline?</p>
+</li>
+<li>
+<p>Do deployments run in the canary phase for a period of time that is long enough to catch any failures?</p>
+</li>
+<li>
+<p>Does the canary phase accurately host a random sample of production traffic?</p>
+</li>
+<li>
+<p>Are the microservice&#8217;s ports the same for canary and production?</p>
+</li>
+<li>
+<p>Are deployments to production done all at the same time, or incrementally rolled out?</p>
+</li>
+<li>
+<p>Is there a procedure in place for skipping the staging and canary phases in case of an emergency?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Dependencies</h2>
+
+<ul>
+<li>
+<p>What are this microservice&#8217;s dependencies?</p>
+</li>
+<li>
+<p>What are its clients?</p>
+</li>
+<li>
+<p>How does this microservice mitigate dependency failures?</p>
+</li>
+<li>
+<p>Are there backups, alternatives, fallbacks, or defensive caching for each <span class="keep-together">dependency</span>?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Routing and Discovery</h2>
+
+<ul>
+<li>
+<p>Are health checks to the microservice reliable?</p>
+</li>
+<li>
+<p>Do health checks accurately reflect the health of the microservice?</p>
+</li>
+<li>
+<p>Are health checks run on a separate channel within the communication layer?</p>
+</li>
+<li>
+<p>Are there circuit breakers in place to prevent unhealthy microservices from making requests?</p>
+</li>
+<li>
+<p>Are there circuit breakers in place to prevent production traffic from being sent to unhealthy hosts and microservices?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect2">
+<h2>Deprecation and Decommissioning</h2>
+
+<ul>
+<li>
+<p>Are there procedures in place for decommissioning a microservice?</p>
+</li>
+<li>
+<p>Are there procedures in place for deprecating a microservice&#8217;s API endpoints?</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+</section>

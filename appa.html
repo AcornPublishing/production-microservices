@@ -1,0 +1,206 @@
+<section data-type="appendix" id="production_readiness_checklist">
+<h1>Production-Readiness Checklist</h1>
+
+
+<p>This <a data-type="indexterm" id="prappacf" data-primary="production-readiness" data-secondary="checklist for"/><a data-type="indexterm" id="cappa" data-primary="checklists" data-secondary="for production-readiness"/>will be a checklist to run over all microservices—manually or in an automated way.</p>
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>A Production-Ready Service Is Stable and Reliable</h1>
+
+<ul>
+<li>
+<p>It has a standardized development cycle.<a data-type="indexterm" data-primary="stability and reliability"/></p>
+</li>
+<li>
+<p>Its code is thoroughly tested through lint, unit, integration, and end-to-end <span class="keep-together">testing</span>.</p>
+</li>
+<li>
+<p>Its test, packaging, build, and release process is completely automated.</p>
+</li>
+<li>
+<p>It has a standardized deployment pipeline, containing staging, canary, and production phases.</p>
+</li>
+<li>
+<p>Its clients are known.</p>
+</li>
+<li>
+<p>Its dependencies are known, and there are backups, alternatives, fallbacks, and caching in place in case of failures.</p>
+</li>
+<li>
+<p>It has stable and reliable routing and discovery in place.</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>A Production-Ready Service Is Scalable and Performant</h1>
+
+<ul>
+<li>
+<p>Its qualitative and quantitative growth scales are known.<a data-type="indexterm" data-primary="scalability and performance"/></p>
+</li>
+<li>
+<p>It uses hardware resources efficiently.</p>
+</li>
+<li>
+<p>Its resource bottlenecks and requirements have been identified.</p>
+</li>
+<li>
+<p>Capacity planning is automated and performed on a scheduled basis.</p>
+</li>
+<li>
+<p>Its dependencies will scale with it.</p>
+</li>
+<li>
+<p>It will scale with its clients.</p>
+</li>
+<li>
+<p>Its traffic patterns are understood.</p>
+</li>
+<li>
+<p>Traffic can be re-routed in case of failures.</p>
+</li>
+<li>
+<p>It is written in a programming language that allows it to be scalable and <span class="keep-together">performant</span>.</p>
+</li>
+<li>
+<p>It handles and processes tasks in a performant manner.</p>
+</li>
+<li>
+<p>It handles and stores data in a scalable and performant way.</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>A Production-Ready Service Is Fault Tolerant and Prepared for Any Catastrophe</h1>
+
+<ul>
+<li>
+<p>It has no single point of failure.<a data-type="indexterm" data-primary="fault tolerance"/></p>
+</li>
+<li>
+<p>All failure scenarios and possible catastrophes have been identified.</p>
+</li>
+<li>
+<p>It is tested for resiliency through code testing, load testing, and chaos testing.</p>
+</li>
+<li>
+<p>Failure detection and remediation has been automated.</p>
+</li>
+<li>
+<p>There are standardized incident and outage procedures in place within the microservice development team and across the organization.</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>A Production-Ready Service Is Properly Monitored</h1>
+
+<ul>
+<li>
+<p>Its key metrics are identified and monitored at the host, infrastructure, and microservice levels.<a data-type="indexterm" data-primary="monitoring"/></p>
+</li>
+<li>
+<p>It has appropriate logging that accurately reflects the past states of the <span class="keep-together">microservice</span>.</p>
+</li>
+<li>
+<p>Its dashboards are easy to interpret and contain all key metrics.</p>
+</li>
+<li>
+<p>Its alerts are actionable and are defined by signal-providing thresholds.</p>
+</li>
+<li>
+<p>There is a dedicated on-call rotation responsible for monitoring and responding to any incidents and outages.</p>
+</li>
+<li>
+<p>There is a clear, well-defined, and standardized on-call procedure in place for handling incidents and outages.</p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect1">
+<h1>A Production-Ready Service Is Documented and Understood</h1>
+
+<ul>
+<li>
+<p>It has comprehensive documentation.<a data-type="indexterm" data-primary="documentation"/><a data-type="indexterm" data-primary="understanding of microservices"/></p>
+</li>
+<li>
+<p>Its documentation is updated regularly.</p>
+</li>
+<li>
+<p>Its documentation contains a description of the microservice; an architecture diagram; contact and on-call information; links to important information; an onboarding and development guide; information about the service&#8217;s request flow(s), endpoints, and dependencies; an on-call runbook; and answers to frequently asked questions.</p>
+</li>
+<li>
+<p>It is well understood at the developer, team, and organizational levels.</p>
+</li>
+<li>
+<p>It is held to a set of production-readiness standards and meets the associated requirements.</p>
+</li>
+<li>
+<p>Its architecture is reviewed and audited frequently.<a data-type="indexterm" data-primary="production-readiness" data-secondary="checklist for" data-startref="prappacf"/><a data-type="indexterm" data-primary="checklists" data-secondary="for production-readiness" data-startref="cappa"/></p>
+</li>
+</ul>
+</section>
+
+
+
+
+
+
+
+</section>

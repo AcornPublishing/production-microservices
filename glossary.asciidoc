@@ -1,0 +1,175 @@
+[[glossary.asciidoc]]
+== Glossary
+
+[glossary]
+actionable alert:: An alert that, when triggered, contains a step-by-step process that the *on-call rotation* can follow to triage, mitigate, and resolve the alert. 
+
+alerting:: The practice of notifying an on-call developer (or developers) when one of a service's *key metrics* has reached a critical or warning *alert threshold*. 
+
+alert threshold:: Static or dynamic quantities that are set for each *key metric* signifying that the key metric in question is at a normal, warning, or critical level; reaching the threshold should trigger an *actionable alert*. 
+
+application platform layer:: The third layer of a microservice ecosystem, containing self-service internal tools, the development environment, test, package, build, and release tools, the deployment pipeline, microservice-level logging, and microservice-level monitoring. 
+
+application programming interface (API):: A well-defined client-side interface in each microservice that allows other services to interact with it programmatically by sending requests to static *endpoints*.  
+
+architecture diagram:: A high-level visual representation of the architecture of a microservice. 
+
+architecture review:: An organizational practice and process for evaluating, understanding, and improving the architecture of a microservice. 
+
+bare metal:: The term used to refer to servers owned, run, and maintained by the organization itself, as opposed to hardware rented from so-called cloud providers.
+
+canary:: The second stage of the *deployment pipeline* containing a small percentage of servers hosting production traffic (2%–5% of production traffic); used to test new builds that have made it through *staging* before being rolled out to all *production* servers. 
+
+candidate for production:: A build that has successfully passed all lint, unit, integration, and end-to-end tests in the *development cycle* and is ready to be introduced into the *deployment pipeline*. 
+
+capacity planning:: The organizational practice of planned and scheduled *resource allocation*. 
+
+cloud providers:: Companies such as Amazon Web Services (AWS), Google Cloud Platform (GCP), and Microsoft Azure that allow hardware resources to be rented and easily accessible over secure networks. 
+
+code testing:: Tests that check syntax, style, individual components of a microservice, how the components work together, and how the microservice performs within its complex dependency chains; comprised of *lint tests*, *unit tests*, *integration tests*, and *end-to-end tests*. 
+
+communication layer:: The second layer of the microservice ecosystem; contains the network, DNS, RPC frameworks, endpoints, messaging, service discovery, service registry, and load balancing. 
+
+concurrency:: Applications and microservices that have concurrency break up each task into small pieces, rather than having just one process that does all of the work; essential property required for scalability. 
+
+continuous integration:: A process that automatically integrates, tests, packages, and builds new changes to code on a scheduled and continuous basis.  
+
+Conway's Law:: An informal "law" of software architecture named after Melvin Conway stating that the architectural structure of a company's products is determined by the communication patterns of the organization; see also *Inverse Conway's Law*. 
+
+dashboard:: A visual, graphical display on an internal website containing graphs and charts of the health, status, behavior, and *key metrics* of an application, microservice, or system. 
+
+decommissioning:: The process of retiring a microservice and/or its API endpoints so that they will no longer be available for use by upstream (client) services. 
+
+dedicated hardware:: Servers or databases that host or store data for only one application, microservice, or system. 
+
+defensive caching:: The practice of caching the data from a microservice's downstream dependencies to protect that microservice from suffering stability and reliability issues if the downstream dependency is unavailable. 
+
+dependency:: A name for any other microservice that a microservice makes requests to; also refers to libraries that a microservice depends on; also used to refer to external (third-party) services that a microservice depends on. 
+
+deployment:: The process through which a new build is sent to servers and the service is started. 
+
+deployment pipeline:: The process of deploying new builds in three stages (to *staging*, to *canary*, and then to *production*). 
+
+deprecation:: When a microservice and/or its endpoints are no longer being maintained by a development team and no longer recommended for use to upstream (client) pass:[<span class="keep-together">services</span>]. 
+
+developer velocity:: The speed at which development teams are able to iterate, roll out new features, and deploy. 
+
+development cycle:: A name for the overall process associated with developing an application, microservice, or system.
+
+development environment:: A system containing tools, environment variables, and processes used by developers to write code for microservices. 
+
+endpoint:: In this book, this term refers to the static API endpoints (HTTP, Thrift, etc.) of microservices that requests are routed to. 
+
+end-to-end tests:: Tests that check whether changes to an application, service, or system work as expected by testing endpoints, clients, dependencies, and any databases.
+
+external failures:: Failures within the lower three layers of the microservice ecosystem stack. 
+
+full staging:: When the *staging* phase of the *deployment pipeline* runs as a complete mirror copy of production. 
+
+growth scale:: A name given to the measure of how an application, microservice, or system scales; every application, microservice, and system has two types of growth scales, a *quantitative growth scale* and a *qualitative growth scale*. 
+
+hardware layer:: The first layer of the microservice ecosystem; contains physical servers, operating systems, resource isolation and abstraction, configuration management, host-level monitoring, and host-level logging. 
+
+hardware resources:: See *resources*. 
+
+horizontal scaling:: When an application or system is scaled by adding more servers (or other hardware resources). 
+
+host and infrastructure metrics:: *Key metrics* of the lower three layers (*hardware layer*, *communication layer*, and *application platform layer*) of the *microservice ecosystem*.
+
+host parity:: When two separate environments, systems, or phases of the deployment pipeline (e.g., *staging* versus *production*) have the same number of hosts in each environment, system, datacenter, or deployment phase. 
+
+infrastructure:: A term used in this book to refer to either the combination of the *application platform layer* and the *communication layer* or the three lowest layers of the microservice ecosystem (*hardware layer*, *communication layer*, and *application platform layer*. 
+
+integration tests:: These test how the components of the microservice (which are tested individually using *unit tests*) work together. 
+
+internal failures:: Failures within a microservice. 
+
+Inverse Conway's Law:: The inverse of *Conway's Law*, which states that the organizational structure of a company is determined by the architecture of its product(s). 
+
+key metrics:: Properties of an application, microservice, or system that are necessary and sufficient for describing the health, status, and behavior of the application, microservice, or system. 
+
+lint tests:: Tests that check syntax and style errors; part of a *code-testing* suite. 
+
+load balancing:: A device or service that distributes traffic across multiple servers or microservices. 
+
+logging:: The practice of recording the events of an application, microservice, or system. 
+
+microservice:: A small, replaceable, modular, independently developed and independently deployed software application that is responsible for performing one function within a larger system. 
+
+microservice ecosystem:: A term for the overall system containing the microservices and infrastructure, which can be divided into four layers containing the microservices, the application platform, the communication layer, and the hardware layer. 
+
+microservice layer:: The fourth layer of the microservice ecosystem; contains the microservices and all microservice-specific configurations. 
+
+microservice metrics:: The *key metrics* unique to each *microservice* in the *microservice layer* of the *microservice ecosystem*. 
+
+monitoring:: The practice of watching and tracking the status, health, and behavior of an application or microservice's *key metrics* over a long period of time.
+
+monolith:: Large, complex software systems that are maintained, run, and deployed as one single application containing all application-related code and features.  
+
+on-call rotation:: A group of developers or operations engineers that are responsible for responding to, mitigating, and resolving an application, microservice, or system's alerts, incidents, and failures. 
+
+on-call runbook:: A section of microservice documentation that contains general incident and outage response procedures, step-by-step instructions on how to triage, mitigate, and resolve each alert, and general tips on how to debug and troubleshoot the microservice; used by the developers or operational engineers who are on call for the service. 
+
+operational engineers:: Engineers whose primary responsibilities are for the operational tasks associated with running a software application, including system administrators, TechOps, DevOps, and site reliability engineers. 
+
+outage:: A period of time during which an application, microservice, or other system is inaccessible (experiencing downtime). 
+
+partial staging:: When the *staging* phase of the *deployment pipeline* is not a complete mirror copy of production, but where microservices in the *staging* environment talk to the *production* versions of clients, dependencies, and databases.  
+
+partitioning:: The process and architectural practice of breaking each task up into smaller pieces that can be processed in parallel; essential property of scalability. 
+
+production:: The final stage of the *deployment pipeline* where all real-world traffic is hosted; also used to refer to real-world traffic and the environment hosting that traffic. 
+
+production-readiness audit:: The process of evaluating a microservice's production-readiness using a *production-readiness checklist*. 
+
+production-readiness automation:: A method for ensuring that microservices meet the production-readiness standards by automatically and programmatically checking whether each microservice adheres to the requirements associated with each production-readiness standard. 
+
+production-readiness checklist:: A list of production-readiness standards, along with specific requirements that can be implemented to achieve each production-readiness standard.
+
+production-readiness roadmap:: A document used as part of the production-readiness process that details the steps that need to be taken to bring a microservice to a production-ready state.  
+
+production-readiness score:: A score assigned to microservices that is calculated based on how well the microservice in question meets the requirements associated with each production-readiness standard. 
+
+publish–subscribe messaging:: An asynchronous messaging paradigm in which clients subscribe to a topic, and will receive a message whenever a publisher publishes a message to that topic. 
+
+qualitative growth scale:: A high-level, qualitative measure of how an application, microservice, or system scales that is tied to high-level business metrics; one type of *growth scale*. 
+
+quantitative growth scale:: A quantitative measure of how an application, microservice, or system scales; obtained by translating the *qualitative growth scale* into a measurable quantity; one type of *growth scale*; usually expressed in terms of requests per second, queries per second, or transactions per second that the application, microservice, or system can process. 
+
+remote procedure call (RPC):: A call made over the network to a remote server that is designed to look and behave exactly like a local procedure call; used extensively in microservice architecture and in all large-scale distributed systems. 
+
+repository:: A centralized archive where all the source code for an application or service is stored. 
+
+request flow:: A name for the pattern of steps that are taken when a request is made from one microservice to another.  
+
+request–response messaging:: A messaging paradigm in which a client will send a request to a *microservice* (or message broker) which will respond with the information requested. 
+
+resource allocation:: Dividing available *hardware resources* across microservice ecosystems. 
+
+resource bottlenecks:: Scalability limitations caused by the way an application, microservice, or system uses its *resources*. 
+
+resource requirements:: The *resources* required by an application, microservice, or system. 
+
+resources:: An abstraction of various performance properties of hardware (servers), like CPU, memory, network, etc. 
+
+self-service internal tools:: Standardized tools in the *application platform layer* of a *microservice ecosystem* that are built to help developers work with the lower layers of the microservice ecosystem to develop, deploy, and run their microservices. 
+
+service discovery:: A system that discovers where all instances of a microservice are hosted, ensuring that traffic is routed to the appropriate servers hosting the application. 
+
+service registry:: A database that tracks all ports and IPs all of microservices and systems within a *microservice ecosystem*. 
+
+shared hardware:: Servers or databases that are used to host or store data for more than one application, microservice, or system simultaneously. 
+
+single point of failure (SPOF):: A piece of an application, microservice, or system that, if it fails, will bring down the application, microservice, or system. 
+
+site reliability engineering (SRE):: Operational engineers responsible in large companies for the reliability of the applications, microservices, or systems within the engineering organization(s). 
+
+splitting the monolith:: The name given to the process of breaking a large monolithic application into a set of microservices. 
+
+staging:: The first phase of a *deployment pipeline* that does not serve production traffic and is used to test new builds; usually a mirror copy of *production*; may be implemented as either *full staging* or *partial staging*.  
+
+three-tier architecture:: A basic architecture for software applications consisting of a frontend (client-side) piece, a backend piece, and some type of datastore. 
+
+unit tests:: Small, independent tests that run over small pieces (or units) or a microservice's code; part of *code testing*. 
+
+vertical scaling:: When an application or system is scaled by increasing the resources (CPU, RAM) of each host that the application or system is running on. 
